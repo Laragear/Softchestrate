@@ -2,6 +2,13 @@
 
 Every behavior change to a baseline gets one entry here, newest first. Compare an installed copy against this file when deciding what to re-import.
 
+## 2026-11-08 - investigating-with-evidence adopts deep-research lessons
+
+- `investigating-with-evidence`: sizes the work by the tree (inline for few leaves, one fresh subagent per independent branch, about three by default); delegated branches are not re-investigated by the caller; leaves stop when answered or when lookups add nothing; the Abstract leads with the answer; the Conclusion states uncertainty and the strongest alternative and takes a position; a claim with no footnote becomes an Absent finding.
+- README credits Anthropic's `deep-research` skill as the basis for these changes.
+- Evals: three new cases and one new check for the above, passing on the cheapest tier.
+- New `references/branch-brief.md`: dispatch brief, notes format (quoted findings, inferences, gaps), lookup budget, one bounded round to close gaps, and rules for extending earlier work. `references/source-handling.md` gains "Weighing a source" (fact vs speculation, original vs aggregator, vague sourcing, currency).
+
 ## 2026-11-07 - disproving-audit-findings runs at the end of an audit
 
 - `disproving-audit-findings`: loads at the end of any audit or review, reuses the report in hand instead of rerunning it, and asks the user whether to test, which findings and where to leave the tests before writing anything. Audit discovery remains for on-request use. Steps renumbered 1-5.

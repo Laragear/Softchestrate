@@ -589,6 +589,11 @@
    },
    {
     "type": "report_match",
+    "pattern": "Conclusion[\\s\\S]*(uncertain|alternative|caveat|unknown|unless)",
+    "flags": "i"
+   },
+   {
+    "type": "report_match",
     "pattern": "\\[\\^[0-9]+\\]"
    },
    {
@@ -839,6 +844,113 @@
     "type": "file_match",
     "path": "UserRepository.php",
     "pattern": "/\\*\\*[\\s\\S]*function isAdmin"
+   }
+  ]
+ },
+ {
+  "id": "investigating-forecast",
+  "target": "skills/investigating-with-evidence/SKILL.md",
+  "fixture": "investigate-forecast",
+  "task": "What is this project's API rate limit per minute right now? Investigate using only the files in this directory (no web access).",
+  "checks": [
+   {
+    "type": "report_match",
+    "pattern": "\\b100\\b"
+   },
+   {
+    "type": "report_match",
+    "pattern": "forecast|roadmap|planned|not decided|speculat|may raise|not in force",
+    "flags": "i"
+   },
+   {
+    "type": "report_absent",
+    "pattern": "limit (is|stands at|of) 500",
+    "flags": "i"
+   },
+   {
+    "type": "report_match",
+    "pattern": "\\[\\^[0-9]+\\]"
+   },
+   {
+    "type": "unchanged",
+    "paths": [
+     "README.md",
+     "docs"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "investigating-gap",
+  "target": "skills/investigating-with-evidence/SKILL.md",
+  "fixture": "investigate-gaps",
+  "task": "What is the request timeout in seconds, and what is the maximum upload size in megabytes, for this API? Investigate using only the files in this directory (no web access).",
+  "checks": [
+   {
+    "type": "report_match",
+    "pattern": "\\b30\\b"
+   },
+   {
+    "type": "report_match",
+    "pattern": "Absent",
+    "flags": "i"
+   },
+   {
+    "type": "report_absent",
+    "pattern": "\\b\\d+\\s?(MB|megabytes)\\b",
+    "flags": "i"
+   },
+   {
+    "type": "report_match",
+    "pattern": "Abstract[\\s\\S]*Conclusion"
+   },
+   {
+    "type": "unchanged",
+    "paths": [
+     "README.md",
+     "src"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "investigating-branch-notes",
+  "target": "skills/investigating-with-evidence/references/branch-brief.md",
+  "fixture": "investigate-gaps",
+  "task": "You are a branch subagent. Your brief: 'Investigate the uploads API limits. Leaves: (1) What is the request timeout in seconds? (2) What is the maximum upload size in megabytes? Constraints: files in this directory only, no web access. Return: the notes in the notes format of your instructions.' Give the notes as your final report instead of writing a file.",
+  "checks": [
+   {
+    "type": "report_match",
+    "pattern": "### Takeaway"
+   },
+   {
+    "type": "report_match",
+    "pattern": "### Quoted findings"
+   },
+   {
+    "type": "report_match",
+    "pattern": "### Inferences"
+   },
+   {
+    "type": "report_match",
+    "pattern": "### Gaps[\\s\\S]*(upload|size|megabyte)",
+    "flags": "i"
+   },
+   {
+    "type": "report_match",
+    "pattern": "REQUEST_TIMEOUT_SECONDS = 30"
+   },
+   {
+    "type": "report_absent",
+    "pattern": "\\b\\d+\\s?(MB|megabytes)\\b",
+    "flags": "i"
+   },
+   {
+    "type": "unchanged",
+    "paths": [
+     "README.md",
+     "src"
+    ]
    }
   ]
  }

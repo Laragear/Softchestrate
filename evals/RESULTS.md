@@ -1,6 +1,6 @@
 # Eval results
 
-Three independent runs of all 27 cases (81 sub-agent runs), each on the cheapest model tier, from fresh fixture copies with no manual edits, graded with the final `cases.json`.
+Three independent runs of the first 27 cases (81 sub-agent runs), each on the cheapest model tier, from fresh fixture copies with no manual edits, graded with the final `cases.json`.
 
 | Run | Passed |
 | --- | --- |
@@ -19,3 +19,7 @@ Open findings about the definitions (not failures):
 - `refactoring-code`: agents keep an unused public function and ask, which matches the "public names are fixed" rule.
 
 Limits: one tier only, mostly gate and contract cases, no live-tool cases (real deploys, container builds, `WRONG_ENTRY`).
+
+## 2026-11-08: investigating-with-evidence update
+
+Three new cases (`investigating-forecast`, `investigating-gap`, `investigating-branch-notes`) and one new check on `investigating-conflict` (the Conclusion states uncertainty or an alternative). One run of the four investigation cases on the cheapest model tier, from fresh fixture copies: 4/4 passed (7/7, 5/5, 5/5, 7/7 checks). The other cases were not rerun. Single run, so no variance data yet.

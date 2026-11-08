@@ -11,6 +11,17 @@ The tier definitions and the conflict rule are in SKILL.md. This file covers how
 - Within one tier, prefer the more recent and more specific source, and say so.
 - A lower-tier source that adds detail without contradicting a higher one is supplementary, not a conflict; cite it as such.
 
+## Weighing a source
+
+Tier says who published it; these checks say whether to believe this passage. Run them before a quote enters Findings.
+
+- Fact or speculation? Predictions, "could" and "may", and future-tense narrative are not findings. Quote them as forecasts or leave them out.
+- Original or aggregator? Follow a citation chain to its origin; if you cannot reach it, record that.
+- Does the source show its basis? Passive voice with nameless sources ("it is said"), vague qualifiers without numbers, and repeated unconfirmed reports are weak even in a good outlet.
+- Is it current? For anything time-sensitive, trust a fresh lookup over memory.
+
+Note a failed check in the finding instead of dropping the source silently.
+
 ## What to record per fact
 
 Tier, publisher, title, location inside the source (article, section, page), URL or path, access date, and the exact quote. These become the footnote and the Findings entry.

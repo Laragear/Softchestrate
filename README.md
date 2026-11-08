@@ -70,7 +70,9 @@ It copies `agents/` into `~/.agents/agents` and makes the installed files identi
 
 Environment variables: `SOFTCHESTRATE_REF` installs a tag or commit instead of `1.x`, `SOFTCHESTRATE_HOME` installs somewhere other than `~/.agents`, and `SOFTCHESTRATE_SOURCE` installs from a local checkout.
 
-### Adapting to your harness
+#Note: `investigating-with-evidence` borrows its subagent sizing, brief and notes format, lookup budget, source weighing and report discipline from Anthropic's `deep-research` skill.
+
+## Adapting to your harness
 
 Neither installer configures any harness. Skills follow the Agent Skills spec, so a harness that supports it loads them directly, and you tune model and effort at dispatch time as described in [Assigning models](AGENTS.md#assigning-models).
 
