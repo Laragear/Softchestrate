@@ -1,0 +1,67 @@
+name: Bug Report
+description: |
+  File a bug report to be fixed.
+
+  Sponsors get priority issues, PRs, fixes and requests. Not a sponsor? You're a just click away! https://github.com/sponsors/DarkGhostHunter.
+title: "What does happen that is considered an error or bug?"
+labels: [ "bug" ]
+type: "bug"
+assignees:
+  - DarkGhostHunter
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+        The more detailed this bug report is, the faster it can be reviewed and fixed.
+  - type: input
+    id: version-os
+    attributes:
+      label: Platform & Shell
+      description: Exact OS and shell where the problem happens.
+      placeholder: macOS 15.1 arm64 - zsh 5.9
+    validations:
+      required: true
+  - type: input
+    id: version-ref
+    attributes:
+      label: Installed ref
+      description: The branch, tag or commit installed (`ORCHESTRATE_REF` for the agents script, `@ref` for the skills CLI). Put "1.x" if you didn't set it.
+      placeholder: 1.x
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      description: The exact command you ran, including options and environment variables.
+      render: shell
+      placeholder: npx skills add Laragear/Orchestrate
+    validations:
+      required: true
+  - type: textarea
+    id: expectation
+    attributes:
+      label: Expectation
+      description: Write what you expect to (correctly) happen.
+      placeholder: When I do this, I expect to happen that.
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Write what (incorrectly) happens instead.
+      placeholder: Instead, when I do this, I receive that.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output & logs
+      description: The full output of the installer or the skills CLI. You may hide sensible information.
+      placeholder: This is automatically formatted into code, no need for ``` backticks.
+      render: shell
+    validations:
+      required: false
