@@ -27,7 +27,7 @@ body:
     id: version-ref
     attributes:
       label: Installed ref
-      description: The branch, tag or commit installed (`ORCHESTRATE_REF` for the agents script, `@ref` for the skills CLI). Put "1.x" if you didn't set it.
+      description: The branch, tag or commit installed (`SOFTCHESTRATE_REF` for the agents script, `@ref` for the skills CLI). Put "1.x" if you didn't set it.
       placeholder: 1.x
     validations:
       required: true
@@ -37,7 +37,7 @@ body:
       label: Command
       description: The exact command you ran, including options and environment variables.
       render: shell
-      placeholder: npx skills add Laragear/Orchestrate
+      placeholder: npx skills add Laragear/Softchestrate
     validations:
       required: true
   - type: textarea

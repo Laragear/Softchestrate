@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Orchestrate eval harness.
+"""Softchestrate eval harness.
 
   run.py prepare RUN_DIR [id ...]   copy fixtures to RUN_DIR/work/<id>, write RUN_DIR/prompts/<id>.txt
   run.py grade   RUN_DIR [id ...]   grade RUN_DIR/results/<id>.txt (+ the work dir) against cases.json

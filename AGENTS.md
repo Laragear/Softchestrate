@@ -1,4 +1,4 @@
-# Orchestrate agent baselines
+# Softchestrate agent baselines
 
 A library of platform-neutral, model-agnostic source definitions for subagents and skills, to be copied or adapted into an agent harness. The directory itself is not a runtime discovery path. These rules apply to the whole tree.
 
@@ -8,8 +8,8 @@ A library of platform-neutral, model-agnostic source definitions for subagents a
 
 Never clone the repository to install. The [README](README.md#installation) owns the commands and the inventory of agents and skills (see its tables). In short:
 
-- Skills: `npx skills add Laragear/Orchestrate` (add `--all -g -y` for everything, globally, without questions).
-- Subagents: `curl -fsSL https://raw.githubusercontent.com/Laragear/Orchestrate/1.x/install-agents.sh | sh`. Read the script before you run it.
+- Skills: `npx skills add Laragear/Softchestrate` (add `--all -g -y` for everything, globally, without questions).
+- Subagents: `curl -fsSL https://raw.githubusercontent.com/Laragear/Softchestrate/1.x/install-agents.sh | sh`. Read the script before you run it.
 - By hand: copy `agents/` and `skills/`. Copy each skill whole, including its own `references/` and `scripts/`. Do not copy the root `references/`: it is maintainer research.
 - Installed copies are replaced on every update. Adapt them under [Adapting into a harness](#adapting-into-a-harness), in the harness's own configuration, never by editing the copies.
 

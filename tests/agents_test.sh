@@ -41,7 +41,7 @@ setup() { # fresh SRC and TARGET per case
 run_install() {
   STATUS=0
   (
-    export ORCHESTRATE_HOME=$CASE/target ORCHESTRATE_SOURCE=$SRC
+    export SOFTCHESTRATE_HOME=$CASE/target SOFTCHESTRATE_SOURCE=$SRC
     sh "$INSTALL" "$@" > "$CASE/out" 2>&1
   ) || STATUS=$?
   OUT=$(cat "$CASE/out")
@@ -169,10 +169,10 @@ test_help_and_unknown_option() {
 test_download_path() {
   setup
   # A fixture tarball shaped like a GitHub archive: one top-level directory.
-  mkdir -p "$CASE/tar/Orchestrate-v9"
-  make_source "$CASE/tar/Orchestrate-v9"
+  mkdir -p "$CASE/tar/Softchestrate-v9"
+  make_source "$CASE/tar/Softchestrate-v9"
   # COPYFILE_DISABLE stops macOS tar from adding ._ metadata files.
-  COPYFILE_DISABLE=1 tar -czf "$CASE/fixture.tar.gz" -C "$CASE/tar" Orchestrate-v9
+  COPYFILE_DISABLE=1 tar -czf "$CASE/fixture.tar.gz" -C "$CASE/tar" Softchestrate-v9
   # Fake curl: log the URL, copy the tarball to the -o target.
   mkdir "$CASE/bin"
   cat > "$CASE/bin/curl" <<FAKE
@@ -187,8 +187,8 @@ FAKE
   chmod +x "$CASE/bin/curl"
   STATUS=0
   (
-    export PATH=$CASE/bin:$PATH ORCHESTRATE_HOME=$CASE/target ORCHESTRATE_REF=v9
-    unset ORCHESTRATE_SOURCE
+    export PATH=$CASE/bin:$PATH SOFTCHESTRATE_HOME=$CASE/target SOFTCHESTRATE_REF=v9
+    unset SOFTCHESTRATE_SOURCE
     sh "$INSTALL" > "$CASE/out" 2>&1
   ) || STATUS=$?
   OUT=$(cat "$CASE/out")

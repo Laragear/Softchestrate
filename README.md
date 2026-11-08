@@ -1,5 +1,5 @@
-# Orchestrate
-[![Latest stable test run](https://github.com/Laragear/Orchestrate/workflows/Tests/badge.svg)](https://github.com/Laragear/Orchestrate/actions)
+# Softchestrate
+[![Latest stable test run](https://github.com/Laragear/Softchestrate/workflows/Tests/badge.svg)](https://github.com/Laragear/Softchestrate/actions)
 ![Subagents: 10](https://img.shields.io/badge/subagents-10-blue)
 ![Skills: 12](https://img.shields.io/badge/skills-12-blue)
 
@@ -32,7 +32,7 @@ flowchart TD
 
 [![](.github/assets/support.png)](https://github.com/sponsors/DarkGhostHunter)
 
-Your support allows me to keep this package free, up-to-date and maintainable. Alternatively, you can **[spread the word!](http://x.com/share?text=I%20am%20using%20this%20cool%20agent%20library&url=https://github.com%2FLaragear%2FOrchestrate)**
+Your support allows me to keep this package free, up-to-date and maintainable. Alternatively, you can **[spread the word!](http://x.com/share?text=I%20am%20using%20this%20cool%20agent%20library&url=https://github.com%2FLaragear%2FSoftchestrate)**
 
 ## Requirements
 
@@ -47,7 +47,7 @@ Almost all modern harnesses support subagents, skills and MCP tools. If not, che
 You never need to clone this repository. The skills go in with the [skills.sh](https://skills.sh) CLI, which installs them into the discovery path of every agent harness it detects:
 
 ```bash
-npx skills add Laragear/Orchestrate
+npx skills add Laragear/Softchestrate
 ```
 
 By default it asks which skills and harnesses to use. Add `--all -y` to install everything without questions, or `-g` to make the skills available across projects. Run the command again to update the installed skills.
@@ -55,7 +55,7 @@ By default it asks which skills and harnesses to use. Add `--all -y` to install 
 The skills CLI only distributes skills, so the subagents go in with a small copy-only script:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Laragear/Orchestrate/1.x/install-agents.sh | sh
+curl -fsSL https://raw.githubusercontent.com/Laragear/Softchestrate/1.x/install-agents.sh | sh
 ```
 
 It copies `agents/` into `~/.agents/agents` and makes the installed files identical to the repository versions on every run. Files that are already equal are left untouched, and anything else in the target directory is never deleted.
@@ -68,21 +68,21 @@ It copies `agents/` into `~/.agents/agents` and makes the installed files identi
 | --- | --- |
 | `--dry-run` | Reports what would change and writes nothing. |
 
-Environment variables: `ORCHESTRATE_REF` installs a tag or commit instead of `1.x`, `ORCHESTRATE_HOME` installs somewhere other than `~/.agents`, and `ORCHESTRATE_SOURCE` installs from a local checkout.
+Environment variables: `SOFTCHESTRATE_REF` installs a tag or commit instead of `1.x`, `SOFTCHESTRATE_HOME` installs somewhere other than `~/.agents`, and `SOFTCHESTRATE_SOURCE` installs from a local checkout.
 
 ### Adapting to your harness
 
 Neither installer configures any harness. Skills follow the Agent Skills spec, so a harness that supports it loads them directly, and you tune model and effort at dispatch time as described in [Assigning models](AGENTS.md#assigning-models).
 
-Subagent definitions need translating into whatever the harness records, so ask it to adapt them: "Adapt the Orchestrate subagents in `~/.agents/agents` to this harness, following AGENTS.md." Write the adapted copies to the harness's own discovery paths and leave the files in `~/.agents/agents` as they are.
+Subagent definitions need translating into whatever the harness records, so ask it to adapt them: "Adapt the Softchestrate subagents in `~/.agents/agents` to this harness, following AGENTS.md." Write the adapted copies to the harness's own discovery paths and leave the files in `~/.agents/agents` as they are.
 
-After each update, adapt again the files the installer reports as installed or updated. To use the baselines in a single project only, run `npx skills add Laragear/Orchestrate` inside it, which defaults to a project install, and bring the subagents with `ORCHESTRATE_HOME=<project> sh install-agents.sh`.
+After each update, adapt again the files the installer reports as installed or updated. To use the baselines in a single project only, run `npx skills add Laragear/Softchestrate` inside it, which defaults to a project install, and bring the subagents with `SOFTCHESTRATE_HOME=<project> sh install-agents.sh`.
 
 ### Letting your agent install it
 
-If your agent can run shell commands, say "Install Laragear/Orchestrate". The agent should:
+If your agent can run shell commands, say "Install Laragear/Softchestrate". The agent should:
 
-1. Run `npx skills add Laragear/Orchestrate` and follow its prompts, or `npx skills add Laragear/Orchestrate --all -g -y` when you want everything installed globally without questions.
+1. Run `npx skills add Laragear/Softchestrate` and follow its prompts, or `npx skills add Laragear/Softchestrate --all -g -y` when you want everything installed globally without questions.
 2. Download `install-agents.sh` from the raw URL above to a file, and read it.
 3. Run that file with `sh <file> --dry-run`, show you the report, and run `sh <file>` when you agree with it.
 4. Adapt the subagent definitions in `~/.agents/agents` to this harness, as described above.
@@ -125,7 +125,7 @@ The complexity column is a suggestion, as for the agents.
 | `disproving-audit-findings` | judgment | Tests code review and audit findings with reproduction tests and reports which are false positives. |
 | `investigating-with-evidence` | judgment | Runs source-traced investigations that end in a checkable report. |
 | `migrating-schemas` | judgment | Writes reversible schema and data migrations that stay safe on live rows, and never runs them. |
-| `orchestrating-plans` | critical | Orchestrates an approved plan by scheduling phases and gating their returns. |
+| `orchestrating-plans` | critical | Softchestrates an approved plan by scheduling phases and gating their returns. |
 | `planning-implementations` | critical | Creates, revises and resumes technical implementation plans. |
 | `refactoring-code` | judgment | Restructures existing code to be smaller and simpler without changing behavior. |
 | `replicating-production-locally` | judgment | Builds a local replica of the decided production architecture so changes can be tested safely. |
@@ -184,7 +184,7 @@ Map the capabilities an agent requests to the tools the target environment has, 
 
 ## Security
 
-If you discover any security-related issues, please [use the online form](https://github.com/Laragear/Orchestrate/security).
+If you discover any security-related issues, please [use the online form](https://github.com/Laragear/Softchestrate/security).
 
 # License
 

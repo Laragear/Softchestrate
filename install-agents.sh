@@ -1,11 +1,11 @@
 #!/bin/sh
 #
-# Installs the Orchestrate subagent definitions in ~/.agents/agents.
+# Installs the Softchestrate subagent definitions in ~/.agents/agents.
 #
-#   curl -fsSL https://raw.githubusercontent.com/Laragear/Orchestrate/1.x/install-agents.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/Laragear/Softchestrate/1.x/install-agents.sh | sh
 #
 # The skills are not handled here: install them with the skills.sh CLI instead,
-# with `npx skills add Laragear/Orchestrate`.
+# with `npx skills add Laragear/Softchestrate`.
 #
 # Copy-only: every run makes the installed files identical to the repository's
 # agents/ directory. It installs new files, overwrites files that upstream
@@ -15,9 +15,9 @@
 
 set -eu
 
-REPO="Laragear/Orchestrate"
-REF="${ORCHESTRATE_REF:-1.x}"
-AGENTS_ROOT="${ORCHESTRATE_HOME:-$HOME/.agents}"
+REPO="Laragear/Softchestrate"
+REF="${SOFTCHESTRATE_REF:-1.x}"
+AGENTS_ROOT="${SOFTCHESTRATE_HOME:-$HOME/.agents}"
 TARGET="$AGENTS_ROOT/agents"
 
 DRY_RUN=0
@@ -34,16 +34,16 @@ usage() {
   cat <<'EOF'
 Usage: install-agents.sh [--dry-run]
 
-Installs the Orchestrate subagent definitions in ~/.agents/agents.
+Installs the Softchestrate subagent definitions in ~/.agents/agents.
 Every run makes the installed files identical to the repository's versions.
 
   --dry-run   report what would change and write nothing
   -h, --help  show this help
 
 Environment:
-  ORCHESTRATE_HOME    install root (default: ~/.agents)
-  ORCHESTRATE_REF     branch, tag or commit to install (default: 1.x)
-  ORCHESTRATE_SOURCE  install from this local checkout instead of downloading
+  SOFTCHESTRATE_HOME    install root (default: ~/.agents)
+  SOFTCHESTRATE_REF     branch, tag or commit to install (default: 1.x)
+  SOFTCHESTRATE_SOURCE  install from this local checkout instead of downloading
 EOF
 }
 
@@ -71,8 +71,8 @@ fetch() { # url file
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
-if [ -n "${ORCHESTRATE_SOURCE:-}" ]; then
-  SRC=$ORCHESTRATE_SOURCE
+if [ -n "${SOFTCHESTRATE_SOURCE:-}" ]; then
+  SRC=$SOFTCHESTRATE_SOURCE
   SOURCE_NAME="local checkout $SRC"
 else
   SRC="$TMP/source"
@@ -88,7 +88,7 @@ if [ ! -d "$SRC/agents" ]; then
   die "$SOURCE_NAME has no agents/ directory"
 fi
 
-echo "Orchestrate agents from $SOURCE_NAME into $TARGET"
+echo "Softchestrate agents from $SOURCE_NAME into $TARGET"
 if [ "$DRY_RUN" -eq 1 ]; then
   echo "Dry run: nothing will be written."
 fi
