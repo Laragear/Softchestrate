@@ -23,3 +23,7 @@ Limits: one tier only, mostly gate and contract cases, no live-tool cases (real 
 ## 2026-11-08: investigating-with-evidence update
 
 Three new cases (`investigating-forecast`, `investigating-gap`, `investigating-branch-notes`) and one new check on `investigating-conflict` (the Conclusion states uncertainty or an alternative). One run of the four investigation cases on the cheapest model tier, from fresh fixture copies: 4/4 passed (7/7, 5/5, 5/5, 7/7 checks). The other cases were not rerun. Single run, so no variance data yet.
+
+## 2026-11-12: plan lifecycle and `refactoring` agent
+
+Cases added or retargeted, none run yet: new `orchestrating-busy` (the `orch-busy` fixture holds an executing and a pending plan; the report must present the wait option and the alternatives); `planning-soft-deletes` now checks `.agents/plans/pending/*.md`; `refactoring-dedupe` and the reworded `refactoring-naming` (former `expressive-naming`) target the new `agents/refactoring.md`.

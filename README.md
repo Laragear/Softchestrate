@@ -1,7 +1,7 @@
 # Softchestrate
 [![Latest stable test run](https://github.com/Laragear/Softchestrate/workflows/Tests/badge.svg)](https://github.com/Laragear/Softchestrate/actions)
-![Subagents: 10](https://img.shields.io/badge/subagents-10-blue)
-![Skills: 12](https://img.shields.io/badge/skills-12-blue)
+![Subagents: 11](https://img.shields.io/badge/subagents-11-blue)
+![Skills: 10](https://img.shields.io/badge/skills-10-blue)
 
 A baseline library of subagents and skills to orchestrate software work with fewer tokens spent.
 
@@ -101,7 +101,7 @@ Nothing in the files points to a model, a provider or a harness. Baselines descr
 
 ## The subagents
 
-Ten agents, each with one role. Choose the narrowest role that fits, or skip the dispatch entirely. The complexity column is a suggestion, not a model choice.
+Eleven agents, each with one role. Choose the narrowest role that fits, or skip the dispatch entirely. The complexity column is a suggestion, not a model choice.
 
 | Agent | Complexity | Description |
 | --- | --- | --- |
@@ -113,6 +113,7 @@ Ten agents, each with one role. Choose the narrowest role that fits, or skip the
 | `general-purpose` | judgment | Handles research, search and multi-step tasks when no narrow role fits. |
 | `lint-static-analysis-fixer` | mundane | Runs formatters, linters and static analyzers and applies only their automatic fixes. |
 | `phase-executor` | interpreting | Executes exactly one phase of an approved plan and tracks it in a durable manifest. |
+| `refactoring` | judgment | Refactors code by YAGNI, KISS, DRY and SOLID in that order, or reports refactoring opportunities found with exploration tools. |
 | `security-auditor` | judgment | Finds exploitable security flaws in code and reports each as a testable claim with evidence, for `disproving-audit-findings` to test. |
 | `test-runner` | interpreting | Runs tests or coverage, reports grouped results and hands structural fixes back as change specs. |
 
@@ -129,11 +130,9 @@ The complexity column is a suggestion, as for the agents.
 | `migrating-schemas` | judgment | Writes reversible schema and data migrations that stay safe on live rows, and never runs them. |
 | `orchestrating-plans` | critical | Softchestrates an approved plan by scheduling phases and gating their returns. |
 | `planning-implementations` | critical | Creates, revises and resumes technical implementation plans. |
-| `refactoring-code` | judgment | Restructures existing code to be smaller and simpler without changing behavior. |
 | `replicating-production-locally` | judgment | Builds a local replica of the decided production architecture so changes can be tested safely. |
 | `upgrading-dependencies` | judgment | Moves one package or framework to a new version, maps its breaking changes to the code and verifies the result. |
 | `writing-documentation` | interpreting | Writes and edits documentation grounded in the code, with a fixed voice. |
-| `writing-expressive-code` | interpreting | Names and structures class, module and API members with a fixed verb vocabulary, and owns doc-comment and method-size rules. |
 
 ### It's working if
 
@@ -147,6 +146,7 @@ One observable signal per definition, to check an import or a run against.
 - `general-purpose`: the report opens by restating the objective and the done condition, then answers with evidence for every claim.
 - `lint-static-analysis-fixer`: every command and exit code is reported, only tool-mandated or closed-list fixes landed, and the rest comes back UNFIXABLE with reasons.
 - `phase-executor`: the manifest shows a terminal status with evidence for every instruction, and the report matches it step for step.
+- `refactoring`: a refactor lands with tools and tests green, behavior and public API identical, and nothing committed; `find` returns ranked opportunities with `path:line` and the rule each breaks, or a failure report when no exploration tools exist.
 - `security-auditor`: every finding is a claim a test could refute, with the input-to-sink path and the missing control named.
 - `test-runner`: failures come back grouped by root cause, chore fixes verified by a re-run, and structural issues as self-contained handback specs.
 - `creating-devcontainers`: the container builds, the ownership probe matches the host UID and GID, and every VERIFY line is PASS with evidence.
@@ -156,11 +156,9 @@ One observable signal per definition, to check an import or a run against.
 - `migrating-schemas`: every migration names its release, its reverse path or why none exists, and its per-statement lock risk.
 - `orchestrating-plans`: phases land collision-free: each gate reconciles the manifest, the report, the actual diff and the acceptance criteria before any commit, and no second plan starts while `executing/` holds one without the user's choice.
 - `planning-implementations`: an executor with no chat history can run the plan, every acceptance criterion has a check, a runner and a seam, and a plan that has not started executing waits in `pending/`.
-- `refactoring-code`: tools and tests are green, behavior and public API are identical, and the result is indistinguishable from the surrounding code.
 - `replicating-production-locally`: one command starts the replica and one tears it down, with every component row carrying `path:line` evidence and its gaps.
 - `upgrading-dependencies`: every breaking change between the versions is applied, recorded as `not used`, or deferred with a reason.
 - `writing-documentation`: every sentence is grounded in code that exists, in the fixed voice, with no invented defaults.
-- `writing-expressive-code`: new names come from the verb dictionary and every non-trivial choice closes with a `decision ← source` trace.
 
 ## Adapting to your harness
 

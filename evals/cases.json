@@ -720,7 +720,7 @@
  },
  {
   "id": "refactoring-dedupe",
-  "target": "skills/refactoring-code/SKILL.md",
+  "target": "agents/refactoring.md",
   "fixture": "refactor",
   "task": "Refactor orders.py: simplify and de-duplicate it, with readable names. Do not change behavior or the public API (`calc` and `total_with_tax` are imported elsewhere). Tests are in tests/ (run: python3 -m unittest discover -s tests). Do not commit.",
   "checks": [
@@ -854,10 +854,10 @@
   ]
  },
  {
-  "id": "expressive-naming",
-  "target": "skills/writing-expressive-code/SKILL.md",
+  "id": "refactoring-naming",
+  "target": "agents/refactoring.md",
   "fixture": "expressive",
-  "task": "In UserRepository.php add two methods: one that tells whether a given User is an administrator (User has a public bool property `admin`), and one that builds a new in-memory User from a name without saving it (User constructor takes `int $id, string $name`; use id 0). Full doc comments.",
+  "task": "mode: refactor\nTarget: UserRepository.php\nGive the repository a method that tells whether a given User is an administrator (User has a public bool property `admin`), and a factory method that builds a new in-memory User from a name without saving it (the User constructor takes `int $id, string $name`; use id 0). Full doc comments on both. Do not commit.",
   "checks": [
    {
     "type": "file_match",

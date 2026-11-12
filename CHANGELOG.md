@@ -2,6 +2,16 @@
 
 Every behavior change to a baseline gets one entry here, newest first. Compare an installed copy against this file when deciding what to re-import.
 
+## 2026-11-12 - `refactoring` agent replaces `writing-expressive-code` and `refactoring-code`
+
+- New `refactoring` agent (judgment): refactors existing code by YAGNI → KISS + DRY → SOLID with behavior and public API unchanged, and ingests the project's rules, tastes and preferences first (`.agents/rules`, `.agents/tastes`, `AGENTS.md`, contributor docs, lint and formatter configs). It carries the naming, verb-dictionary, structure, method-size and doc-comment rules of the removed `writing-expressive-code` skill.
+- Two modes, stated in the task text with the target: `refactor` restructures the named code; `find` reports ranked refactoring opportunities without editing. `find` relies on code exploration or search tools and reports `STATUS: FAILED` without them rather than reading the codebase by hand, except for exact files the caller named.
+- Massive scope (multi-domain, over 15 files) is not started: the agent reports a split into independent plans per domain and stops.
+- Removed skills: `writing-expressive-code` (folded into the agent) and `refactoring-code` (procedure folded into the agent).
+- `phase-executor` (agent): the dead `writing-expressive-code` reference is replaced by the inline style core it already carried.
+- `upgrading-dependencies`: its "do not restructure" pointer now names the `refactoring` agent instead of the removed skill.
+- Evals: `expressive-naming` becomes `refactoring-naming` on the agent (task reworded as a refactor request, checks unchanged); `refactoring-dedupe` targets the agent. Unrun.
+
 ## 2026-11-12 - Plans stage in `pending`; one execution at a time
 
 - `planning-implementations`: a plan is always created in `.agents/plans/pending/`, never in `executing`, until its execution begins, so other plans keep executing while a new one is proposed or amended. Phase manifests live beside the executing plan under `executing/{plan-id}/`; pending plans are amended in place; a series is found by its ID prefix across `pending/`, `executing/` and `complete/`.

@@ -58,7 +58,7 @@ Write discipline: flip to `on-progress` before an instruction, rewrite to `succe
 
 ## Code style
 
-Pinned contracts stay verbatim; on style, the repository wins. Follow `writing-expressive-code` when your toolset has it: it owns naming, doc comments and method size, and it already ranks the file, its siblings and the project rules above itself. Where an exemplar or `AGENTS.md` convention conflicts with that guide or with this section, the repository rule wins and the conflict goes to DEVIATIONS. Without the guide in your toolset, keep to its core: write nothing the phase does not need; one responsibility per method; expressive names (`key`, not `k`), except language conventions (`i` in a counted loop); a full doc comment on every method you write (what it does in context, then inputs, outputs and failures, never the name restated); a comment above dense handling (array or string gymnastics, loops on loops, binary work) saying what happens and why.
+Pinned contracts stay verbatim; on style, the repository wins: the exemplars, the file's siblings and `AGENTS.md` outrank this section, and a conflict goes to DEVIATIONS. Keep to the core: write nothing the phase does not need; one responsibility per method; expressive names (`key`, not `k`), except language conventions (`i` in a counted loop); a full doc comment on every method you write (what it does in context, then inputs, outputs and failures, never the name restated); a comment above dense handling (array or string gymnastics, loops on loops, binary work) saying what happens and why.
 
 ## Procedure
 
