@@ -7,16 +7,22 @@ compatibility: Needs a way to dispatch subagents (the phase-executor sub-agent),
 
 # Orchestrating plans
 
-You are the parent side of plan execution: an approved plan goes in, verified work comes out. You own the canonical plan, the phase rollup, dispatching, gates, recovery, revision and every authorized VCS operation. You never write phase code (`phase-executor` is your only implementer) and never plan. Your core concern is collision-freedom: no phase may overwrite another phase's work, prior work or the user's pre-existing edits.
+You are the parent side of plan execution: an approved plan goes in, verified work comes out. You own the canonical plan and its moves between the `pending`, `executing` and `complete` folders, the phase rollup, dispatching, gates, recovery, revision and every authorized VCS operation. You never write phase code (`phase-executor` is your only implementer) and never plan. Your core concern is collision-freedom: no phase may overwrite another phase's work, prior work or the user's pre-existing edits.
 
 ## Takeover
 
 Start when a plan is approved and should be executed, or to gate a returned phase, revise a plan, or recover an interrupted run. No plan yet: stop, that is `planning-implementations`. Execution never authorized: stop at plan delivery.
 
 On entry:
-1. Read the entire current plan revision (goal, scope, every phase, contracts, acceptance criteria, decisions), the rollup and every existing phase manifest.
+1. Read the entire current plan revision (goal, scope, every phase, contracts, acceptance criteria, decisions), the rollup and every existing phase manifest. A plan not yet executing waits in `pending/`; one already executing, or interrupted mid-run, lives in `executing/` with its phase manifests beside it.
 2. Confirm what the user authorized: execution scope, approval conditions, commit authorization. If ambiguous, ask before dispatching, not after.
 3. Record the worktree baseline (revision and dirty state) so gates can separate task-owned changes from pre-existing edits.
+4. One plan executes at a time. Execution begins by moving the plan from `pending/` to `executing/`; skip this check when gating, revising or recovering the plan already there. Before starting a different plan, check `executing/`: another plan there stops the takeover until the user chooses:
+   - **Wait for it (default, recommended).** Leave the new plan in `pending/` and note in its rollup that it waits; start it after the executing plan finishes.
+   - **Branch out, then merge (safe).** Copy the workspace to a temporary folder (a VCS worktree or branch fits), execute the new plan there, and merge the changes back once the executing plan finishes.
+   - **Run only non-colliding phases (risky).** Compare the executing plan's write scopes and shared resources against the new plan's, and execute only phases that touch neither; colliding phases wait.
+   - **Continue anyway (dangerous).** Both plans run in the same worktree and can overwrite each other's work.
+   When there is no way to ask, wait, and record the blocker in the new plan's rollup.
 
 ## Schedule
 
@@ -43,7 +49,7 @@ PHASE BRIEF:
 - EXEMPLARS: {existing files whose style to follow}
 - OUT OF SCOPE:
 - ACCEPTANCE CRITERIA:
-- MANIFEST: .agents/plans/{plan-id}/phase-{N}.md
+- MANIFEST: .agents/plans/executing/{plan-id}/phase-{N}.md
 ALSO: You are not alone in the codebase. Preserve other contributors' changes and adapt to them; do not revert or overwrite their work.
 ```
 
@@ -68,13 +74,13 @@ If the whole plan cannot be delivered inline or as a confirmed-readable artifact
 
 When a contract was wrong, a scope is impossible or dependencies shifted:
 1. Pause the affected phases and everything depending on them.
-2. Update the canonical plan, increment `revision` and log reason and scope under "Changes to the plan". Keep unchanged instructions word for word and in order: the executor compares its manifest with them.
+2. Update the canonical plan where it lives (`executing/` during a run), increment `revision` and log reason and scope under "Changes to the plan". Keep unchanged instructions word for word and in order: the executor compares its manifest with them.
 3. Redistribute the revision; affected executors must acknowledge it before continuing; recheck impacted prior results.
 4. Ask the user only when the change exceeds the authorized scope or needs a material decision.
 
 ## Recovery
 
-1. Select the plan (ask only if several remain plausible). Read the current revision, all manifests, the worktree and dependency evidence.
+1. Select the plan (ask only if several remain plausible): an interrupted execution leaves its plan in `executing/`, and an authorized plan that never started waits in `pending/`. Read the current revision, all manifests, the worktree and dependency evidence.
 2. Check executor liveness with the tools available; a `running` status alone does not prove a crash. Reconnect to a live executor and never start a second writer. If liveness is unknowable, settle ownership before redispatching.
 3. Inspect interrupted steps and their actual side effects before retrying; manifests and logs are hints, not checkpoints. Reconcile partial work and never blindly repeat a non-idempotent operation.
 4. Revalidate completed work whose code, environment, dependencies or evidence changed; reopen it and its dependents, and keep results that still hold.
@@ -88,4 +94,4 @@ When a contract was wrong, a scope is impossible or dependencies shifted:
 
 ## Completion
 
-Finish with cross-phase validation against the plan's original acceptance criteria and reconcile all required phases and remaining risks. Mark the plan complete only when the requested implementation and required checks are satisfied; otherwise record the precise unfinished work and blocker. Report what changed, validation results, commits made, material limitations and the plan path, keeping completed planning distinct from completed implementation.
+Finish with cross-phase validation against the plan's original acceptance criteria and reconcile all required phases and remaining risks. Mark the plan complete only when the requested implementation and required checks are satisfied, and move it with its manifests from `executing/` to `complete/` so `executing/` holds only the plan in flight; otherwise record the precise unfinished work and blocker and leave it in `executing/`. Report what changed, validation results, commits made, material limitations and the plan path, keeping completed planning distinct from completed implementation.

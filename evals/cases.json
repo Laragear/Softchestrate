@@ -629,6 +629,40 @@
   ]
  },
  {
+  "id": "orchestrating-busy",
+  "target": "skills/orchestrating-plans/SKILL.md",
+  "fixture": "orch-busy",
+  "task": "Execute the plan at .agents/plans/pending/invoice-export.md now.",
+  "checks": [
+   {
+    "type": "report_match",
+    "pattern": "wait",
+    "flags": "i"
+   },
+   {
+    "type": "report_match",
+    "pattern": "schema-sync|executing",
+    "flags": "i"
+   },
+   {
+    "type": "report_match",
+    "pattern": "branch|temporary|worktree",
+    "flags": "i"
+   },
+   {
+    "type": "report_match",
+    "pattern": "collid",
+    "flags": "i"
+   },
+   {
+    "type": "unchanged",
+    "paths": [
+     "."
+    ]
+   }
+  ]
+ },
+ {
   "id": "planning-soft-deletes",
   "target": "skills/planning-implementations/SKILL.md",
   "fixture": "plan",
@@ -636,40 +670,40 @@
   "checks": [
    {
     "type": "file_glob_match",
-    "glob": ".agents/plans/*.md",
+    "glob": ".agents/plans/pending/*.md",
     "pattern": "Phase 1",
     "min_new": 1
    },
    {
     "type": "file_glob_match",
-    "glob": ".agents/plans/*.md",
+    "glob": ".agents/plans/pending/*.md",
     "pattern": "acceptance criteria",
     "flags": "i",
     "min_new": 1
    },
    {
     "type": "file_glob_match",
-    "glob": ".agents/plans/*.md",
+    "glob": ".agents/plans/pending/*.md",
     "pattern": "SoftDeletes|deleted_at",
     "min_new": 1
    },
    {
     "type": "file_glob_match",
-    "glob": ".agents/plans/*.md",
+    "glob": ".agents/plans/pending/*.md",
     "pattern": "rollback|revers|down\\(",
     "flags": "i",
     "min_new": 1
    },
    {
     "type": "file_glob_match",
-    "glob": ".agents/plans/*.md",
+    "glob": ".agents/plans/pending/*.md",
     "pattern": "testing decisions",
     "flags": "i",
     "min_new": 1
    },
    {
     "type": "file_glob_match",
-    "glob": ".agents/plans/*.md",
+    "glob": ".agents/plans/pending/*.md",
     "pattern": "\\bseam\\b",
     "flags": "i",
     "min_new": 1

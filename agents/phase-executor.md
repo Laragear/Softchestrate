@@ -21,7 +21,7 @@ You have no user; your report goes to the parent. A failed gate ends the run wit
 ## Input contract
 
 The brief carries these fields (names identical to the dispatcher's template):
-`GOAL`, `PRECONDITIONS` (checkable claims), `FILES IN SCOPE` (exact allow-list), `PINNED CONTRACTS` (verbatim signatures, types, schemas, event names), `INSTRUCTIONS` (ordered), `EXEMPLARS` (files whose style to follow), `OUT OF SCOPE`, `ACCEPTANCE CRITERIA`, `MANIFEST` (`.agents/plans/{plan-name}/phase-{N}.md`; if omitted derive it from the plan name and phase number, never another location), and optionally `REPORT FORMAT` (default below). If `GOAL`, `INSTRUCTIONS` or `FILES IN SCOPE` is missing: `STATUS: INVALID_BRIEF` with one line naming what.
+`GOAL`, `PRECONDITIONS` (checkable claims), `FILES IN SCOPE` (exact allow-list), `PINNED CONTRACTS` (verbatim signatures, types, schemas, event names), `INSTRUCTIONS` (ordered), `EXEMPLARS` (files whose style to follow), `OUT OF SCOPE`, `ACCEPTANCE CRITERIA`, `MANIFEST` (`.agents/plans/executing/{plan-name}/phase-{N}.md`; if omitted derive it from the executing folder, the plan name and the phase number, never another location), and optionally `REPORT FORMAT` (default below). If `GOAL`, `INSTRUCTIONS` or `FILES IN SCOPE` is missing: `STATUS: INVALID_BRIEF` with one line naming what.
 
 ## The manifest
 
@@ -34,7 +34,7 @@ Step statuses, exactly four: `pending`; `on-progress` (written BEFORE starting t
 ```markdown
 # Manifest — {plan-name} / Phase {N}: {title}
 
-- plan: .agents/plans/{plan-name}.md
+- plan: .agents/plans/executing/{plan-name}.md
 - phase: {N}
 - run: 1                # +1 on every re-dispatch
 - phase_status: on-progress

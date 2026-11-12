@@ -63,11 +63,11 @@ Decide where each phase's behavior is verified before writing phases. A seam is 
 
 ## Write the durable plan
 
-Use the user's or repository's required location; otherwise:
-- Plan: `.agents/plans/{plan-id}.md`
-- Phase manifests (created during execution by `phase-executor`): `.agents/plans/{plan-id}/phase-{N}.md`
+Use the user's or repository's required location; otherwise a plan is always created in the `pending` folder, never in `executing`, until its execution begins. Pending keeps proposals and amendments away from the plan under execution, so other plans keep executing while a new one is proposed or amended:
+- Plan (not yet executing): `.agents/plans/pending/{plan-id}.md`
+- Phase manifests (created during execution by `phase-executor`, beside the plan once it moved to executing): `.agents/plans/executing/{plan-id}/phase-{N}.md`
 
-Use a descriptive kebab-case ID, adding a suffix only to avoid a collision. Revisions keep the ID and increment `revision`; a new linked plan only for a true replacement. Never overwrite an unrelated plan. For a series use `{series-id}-{order}-{group}` (`audit-fixes-1-models`, `audit-fixes-2-actions`) and set `series`, `group`, `order`, `depends on plans`; plans with no mutual dependency may share an order number; find a series with `.agents/plans/{series-id}-*.md`.
+Use a descriptive kebab-case ID, adding a suffix only to avoid a collision. Revisions keep the ID and increment `revision`; a new linked plan only for a true replacement. Never overwrite an unrelated plan. Amend a pending plan where it is; a plan under execution is revised by `orchestrating-plans` where it lives. For a series use `{series-id}-{order}-{group}` (`audit-fixes-1-models`, `audit-fixes-2-actions`) and set `series`, `group`, `order`, `depends on plans`; plans with no mutual dependency may share an order number; find a series by its ID prefix across `pending/`, `executing/` and `complete/`.
 
 Save before presenting or dispatching. Draft the plan once as Markdown in a scratch file (the session scratchpad, not the repository), then copy it to the target path with a file-copy tool or `cp`: `cp -n` for a new plan ID so an existing plan is never overwritten, plain `cp` for a revision of the same ID. Confirm the copy with `cmp` against the draft. Write the target with a write tool only as a last resort, when no copy tool or `cp` is available or the copy fails; never re-output a plan that is already saved. If writes are unavailable, deliver the full Markdown inline, name the intended path and say persistence is unavailable. A native planning tool may mirror the file; the Markdown is canonical.
 

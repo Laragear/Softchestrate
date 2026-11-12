@@ -154,8 +154,8 @@ One observable signal per definition, to check an import or a run against.
 - `disproving-audit-findings`: every finding ends as Confirmed, False positive or Not testable, each backed by a reproduction test someone reviewed.
 - `investigating-with-evidence`: every claim in the report carries a verbatim quote and a footnote a reader can open.
 - `migrating-schemas`: every migration names its release, its reverse path or why none exists, and its per-statement lock risk.
-- `orchestrating-plans`: phases land collision-free: each gate reconciles the manifest, the report, the actual diff and the acceptance criteria before any commit.
-- `planning-implementations`: an executor with no chat history can run the plan, and every acceptance criterion has a check, a runner and a seam.
+- `orchestrating-plans`: phases land collision-free: each gate reconciles the manifest, the report, the actual diff and the acceptance criteria before any commit, and no second plan starts while `executing/` holds one without the user's choice.
+- `planning-implementations`: an executor with no chat history can run the plan, every acceptance criterion has a check, a runner and a seam, and a plan that has not started executing waits in `pending/`.
 - `refactoring-code`: tools and tests are green, behavior and public API are identical, and the result is indistinguishable from the surrounding code.
 - `replicating-production-locally`: one command starts the replica and one tears it down, with every component row carrying `path:line` evidence and its gaps.
 - `upgrading-dependencies`: every breaking change between the versions is applied, recorded as `not used`, or deferred with a reason.

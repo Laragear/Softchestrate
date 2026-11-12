@@ -2,6 +2,13 @@
 
 Every behavior change to a baseline gets one entry here, newest first. Compare an installed copy against this file when deciding what to re-import.
 
+## 2026-11-12 - Plans stage in `pending`; one execution at a time
+
+- `planning-implementations`: a plan is always created in `.agents/plans/pending/`, never in `executing`, until its execution begins, so other plans keep executing while a new one is proposed or amended. Phase manifests live beside the executing plan under `executing/{plan-id}/`; pending plans are amended in place; a series is found by its ID prefix across `pending/`, `executing/` and `complete/`.
+- `orchestrating-plans`: owns the `pending` → `executing` → `complete` moves. Starting a plan while another one is in `executing/` stops the takeover for the user's choice: wait for it (default, recommended), branch out to a temporary folder and merge back (safe), run only the non-colliding phases (risky), or continue anyway (dangerous). Unattended, it waits. Completion moves the finished plan to `complete/`.
+- `phase-executor` (agent): manifest paths follow the executing folder (`.agents/plans/executing/{plan-name}/phase-{N}.md`).
+- Evals: `planning-soft-deletes` now checks `.agents/plans/pending/*.md`; new `orchestrating-busy` case with the `orch-busy` fixture covers the executing-plan gate (unrun).
+
 ## 2026-11-08 - investigating-with-evidence adopts deep-research lessons
 
 - `investigating-with-evidence`: sizes the work by the tree (inline for few leaves, one fresh subagent per independent branch, about three by default); delegated branches are not re-investigated by the caller; leaves stop when answered or when lookups add nothing; the Abstract leads with the answer; the Conclusion states uncertainty and the strongest alternative and takes a position; a claim with no footnote becomes an Absent finding.
