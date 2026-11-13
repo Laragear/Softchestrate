@@ -101,7 +101,7 @@ Nothing in the files points to a model, a provider or a harness. Baselines descr
 
 ## The subagents
 
-Eleven agents, each with one role. Choose the narrowest role that fits, or skip the dispatch entirely. The complexity column is a suggestion, not a model choice.
+Twelve agents, each with one role. Choose the narrowest role that fits, or skip the dispatch entirely. The complexity column is a suggestion, not a model choice.
 
 | Agent | Complexity | Description |
 | --- | --- | --- |
@@ -113,7 +113,8 @@ Eleven agents, each with one role. Choose the narrowest role that fits, or skip 
 | `general-purpose` | judgment | Handles research, search and multi-step tasks when no narrow role fits. |
 | `lint-static-analysis-fixer` | mundane | Runs formatters, linters and static analyzers and applies only their automatic fixes. |
 | `phase-executor` | interpreting | Executes exactly one phase of an approved plan and tracks it in a durable manifest. |
-| `refactoring` | judgment | Refactors code by YAGNI, KISS, DRY and SOLID in that order, or reports refactoring opportunities found with exploration tools. |
+| `refactoring` | judgment | Refactors code by YAGNI, KISS, DRY and SOLID in that order, following the project's own rules. |
+| `refactoring-finder` | judgment | Reads code with exploration tools and returns ranked refactoring opportunities with `path:line` evidence, editing nothing. |
 | `security-auditor` | judgment | Finds exploitable security flaws in code and reports each as a testable claim with evidence, for `disproving-audit-findings` to test. |
 | `test-runner` | interpreting | Runs tests or coverage, reports grouped results and hands structural fixes back as change specs. |
 
@@ -146,7 +147,8 @@ One observable signal per definition, to check an import or a run against.
 - `general-purpose`: the report opens by restating the objective and the done condition, then answers with evidence for every claim.
 - `lint-static-analysis-fixer`: every command and exit code is reported, only tool-mandated or closed-list fixes landed, and the rest comes back UNFIXABLE with reasons.
 - `phase-executor`: the manifest shows a terminal status with evidence for every instruction, and the report matches it step for step.
-- `refactoring`: a refactor lands with tools and tests green, behavior and public API identical, and nothing committed; `find` returns ranked opportunities with `path:line` and the rule each breaks, or a failure report when no exploration tools exist.
+- `refactoring`: a refactor lands with tools and tests green, behavior and public API identical, and nothing committed, in a report under about 300 words.
+- `refactoring-finder`: it returns at most 15 ranked opportunities with `path:line` and the rule each breaks, or a failure report when no exploration tools exist.
 - `security-auditor`: every finding is a claim a test could refute, with the input-to-sink path and the missing control named.
 - `test-runner`: failures come back grouped by root cause, chore fixes verified by a re-run, and structural issues as self-contained handback specs.
 - `creating-devcontainers`: the container builds, the ownership probe matches the host UID and GID, and every VERIFY line is PASS with evidence.
@@ -176,7 +178,59 @@ complexity: "judgment"
 
 Treat `complexity` as a suggestion, not a rule. The harness should evaluate each task and pick the model and effort for it, using the tiers described in [Assigning models](AGENTS.md#assigning-models). A `critical` definition whose current task is a bounded procedure may not need the top tier, while a `judgment` security audit may need only a strong one. If the harness has no data on its models, it should look up their capabilities and prices before assigning anything. Usage is the cost to avoid: mundane tasks should not burn the most expensive model.
 
-Map the capabilities an agent requests to the tools the target environment has, with MCP servers where supported. Read-only agents (`code-reviewer`, `build-doctor`, `code-explorer`) should be limited to read tools in the harness, not only in prose. Where the harness lets you keep a skill from being started by the model alone, do it for `deploying-builds`, since it changes live state. Make runtime adaptations in the harness's native configuration; modify a baseline only when the baseline itself is what you were asked to change.
+Map the capabilities an agent requests to the tools the target environment has, with MCP servers where supported. Read-only agents (`code-reviewer`, `build-doctor`, `code-explorer`, `refactoring-finder`) should be limited to read tools in the harness, not only in prose. Where the harness lets you keep a skill from being started by the model alone, do it for `deploying-builds`, since it changes live state. Make runtime adaptations in the harness's native configuration; modify a baseline only when the baseline itself is what you were asked to change.
+
+## How they connect
+
+The diagram at the top shows the plan pipeline alone; this is the whole library. Arrows are handoffs and dispatches the baselines name themselves, read as "sends work to". Any agent is also fair game for a direct dispatch when its narrow role fits, and `general-purpose` is the catch-all behind the skills that say "one fresh sub-agent per task or branch". Nothing in the arrows points at `creating-devcontainers`, `writing-documentation`, `code-explorer`, `refactoring-finder`, `codemod-runner` or `fixture-factory-generator`: each is dispatched straight from the conversation, with the brief its description asks for.
+
+```mermaid
+flowchart TD
+    subgraph SKILLS["Skills: how you work"]
+        PI["planning-implementations"]
+        OP["orchestrating-plans"]
+        UP["upgrading-dependencies"]
+        DB["deploying-builds"]
+        MS["migrating-schemas"]
+        RP["replicating-production-locally"]
+        IW["investigating-with-evidence"]
+        DA["disproving-audit-findings"]
+        CD["creating-devcontainers"]
+        WD["writing-documentation"]
+    end
+
+    subgraph FLEET["Sub-agents: who does the work"]
+        GP["general-purpose"]
+        PE["phase-executor"]
+        RF["refactoring"]
+        RFF["refactoring-finder"]
+        TR["test-runner"]
+        BD["build-doctor"]
+        LF["lint-static-analysis-fixer"]
+        CR["code-reviewer"]
+        CE["code-explorer"]
+        SA["security-auditor"]
+        CM["codemod-runner"]
+        FF["fixture-factory-generator"]
+    end
+
+    UP -->|"upgrades that move together"| PI
+    PI -->|"authorized execution"| OP
+    OP -->|"one phase per dispatch"| PE
+    OP -->|"tests and coverage"| TR
+    OP -->|"build and boot failures"| BD
+    OP -->|"lint and static analysis"| LF
+    OP -->|"pre-commit review"| CR
+    UP -->|"red install or build"| BD
+    UP -->|"triage on large suites"| TR
+    UP -->|"restructuring"| RF
+    UP -->|"publishing"| DB
+    DB -->|"one task per dispatch"| GP
+    IW -->|"one branch per dispatch"| GP
+    DA -->|"reproduction tests"| GP
+    SA -->|"claims to test"| DA
+    MS -->|"production-shaped copy"| RP
+```
 
 ## For maintainers
 
