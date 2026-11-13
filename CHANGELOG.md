@@ -2,6 +2,18 @@
 
 Every behavior change to a baseline gets one entry here, newest first. Compare an installed copy against this file when deciding what to re-import.
 
+## 2026-11-12 - `refactoring` split from `find`; audit fixes
+
+Based on an audit of `agents/refactoring.md` against `references/`.
+
+- New `refactoring-finder` agent (judgment): the former `find` mode as its own read-only role, so the importer can enforce read-only by restricting tools (listed in AGENTS.md and the README). It surveys one domain per run, lists at most 15 ranked opportunities, and reports `STATUS: FAILED` without exploration tools.
+- `refactoring` (agent): the `find` mode is gone and only the target is required. The mode word in a task is no longer needed.
+- `refactoring`: the size gate no longer has a gap. Massive is more than one domain, more than 15 files or more than about 1,500 lines; Lite is at most 2 files and about 300 lines; Standard is everything else. The method-size cues are marked as defaults that project rules override.
+- `refactoring`: the doc-comment rule now requires a summary line always, and parameter, return and failure entries only when they add meaning the signature lacks.
+- `refactoring`: the report stays under about 300 words; a decision it cannot make no longer blocks the unblocked work and is listed with a recommendation; files already in context are not re-read.
+- `refactoring`: the description is shorter, and the long paragraphs (rules ingestion, exploration, verbs, verification, report) are now short sentences and lists. The verb dictionary stays in this agent as its single owner.
+- Evals: `refactoring-naming` drops the `mode: refactor` line from its task.
+
 ## 2026-11-12 - `refactoring` agent replaces `writing-expressive-code` and `refactoring-code`
 
 - New `refactoring` agent (judgment): refactors existing code by YAGNI → KISS + DRY → SOLID with behavior and public API unchanged, and ingests the project's rules, tastes and preferences first (`.agents/rules`, `.agents/tastes`, `AGENTS.md`, contributor docs, lint and formatter configs). It carries the naming, verb-dictionary, structure, method-size and doc-comment rules of the removed `writing-expressive-code` skill.

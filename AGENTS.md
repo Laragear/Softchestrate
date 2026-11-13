@@ -51,7 +51,7 @@ The *harness configuration* is the harness's native settings, outside these base
 3. Decide each skill's invocation. Leave skills model-reachable unless the harness gives a reason. Where the harness can stop the model from starting a skill by itself, do that for `deploying-builds`.
 4. Keep a skill's `description` a pointer: triggers and exclusions, never a summary of the body. Cut any identity or procedure the body already carries.
 5. Grant tool access, including MCP servers where supported. Map each requested capability to the target's tools and set a practical fallback when one is missing.
-6. Enforce read-only roles (`code-reviewer`, `build-doctor`, `code-explorer`, `security-auditor`) by restricting tools, not by prose.
+6. Enforce read-only roles (`code-reviewer`, `build-doctor`, `code-explorer`, `refactoring-finder`, `security-auditor`) by restricting tools, not by prose.
 7. Do not hard-wire one model per definition.
 
 ## Assigning models
