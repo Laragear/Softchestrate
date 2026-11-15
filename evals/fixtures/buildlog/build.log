@@ -1,0 +1,17 @@
+$ npm run build
+> app@1.0.0 build
+> vite build
+NPM_TOKEN=npm_9f2c81ab47dee6a4
+
+vite v5.2.0 building for production...
+error during build:
+Error: Cannot find module 'left-pad' imported from /srv/app/src/utils/pad.ts
+    at /srv/app/src/utils/pad.ts:1:23
+src/utils/pad.ts(1,23): error TS2307: Cannot find module 'left-pad' or its corresponding type declarations.
+src/components/Cart.ts(4,10): error TS2305: Module '"../utils/pad"' has no exported member 'pad'.
+src/components/Cart.ts(19,5): error TS2339: Property 'pad' does not exist on type 'unknown'.
+src/components/Invoice.ts(8,10): error TS2305: Module '"../utils/pad"' has no exported member 'pad'.
+src/components/Invoice.ts(30,9): error TS2339: Property 'pad' does not exist on type 'unknown'.
+src/pages/Checkout.ts(2,10): error TS2305: Module '"../utils/pad"' has no exported member 'pad'.
+Found 6 errors.
+exit status 1

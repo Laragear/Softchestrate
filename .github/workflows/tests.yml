@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  push:
+    branches:
+      - "1.x"                               # Only run when pushing to the core branch.
+  pull_request:
+    types: [opened, synchronize, reopened]  # Only run on PRs.
+
+jobs:
+  test:
+    name: Testing on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false                      # Let every OS report, even if one fails.
+      matrix:
+        os: [ubuntu-slim, macos-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash                         # Git Bash on Windows, so `sh` and the POSIX tools exist.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24                  # The skills CLI needs Node.js 22.20 or later.
+
+      - name: Run the agents installer test
+        run: sh tests/agents_test.sh
+
+      - name: Run the skills.sh install test
+        run: sh tests/skills_test.sh

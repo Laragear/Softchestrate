@@ -1,0 +1,252 @@
+# Softchestrate
+[![Latest stable test run](https://github.com/Laragear/Softchestrate/workflows/Tests/badge.svg)](https://github.com/Laragear/Softchestrate/actions)
+![Subagents: 11](https://img.shields.io/badge/subagents-11-blue)
+![Skills: 10](https://img.shields.io/badge/skills-10-blue)
+
+A baseline library of subagents and skills to orchestrate software work with fewer tokens spent.
+
+- **Pay for the work, not the conversation.** Each task goes to the narrowest subagent in a fresh context, so you only spend tokens on the role that actually does the job.
+- **Proof before reports.** Definitions verify their own output — containers that build, migrations that reverse, deploys that pass health checks — before claiming success.
+- **No model hard-wired.** A `complexity` tier per definition plus dispatch-time model assignment lets any harness pick the cheapest model that fits the task.
+
+```mermaid
+flowchart TD
+    P["planning-implementations<br>skill"] -->|"creates and persists"| PLAN[("plan")]
+    PLAN --> O{"orchestrating-plans<br>skill"}
+    O -->|"dispatches one phase each"| PE1["phase-executor<br>subagent"]
+    O --> PE2["phase-executor<br>subagent"]
+    O --> PEn["phase-executor<br>..."]
+    PE1 -.->|"called on demand"| SUP
+    subgraph SUP ["on-demand support"]
+        BD["build-doctor"]
+        TR["test-runner"]
+        CR["code-reviewer<br>and others"]
+    end
+```
+
+> [!TIP]
+> 
+> Skills change _how_ you work, subagents change _who_ does the work. When a task fits a narrower agent, dispatch it instead.
+
+## Become a sponsor
+
+[![](.github/assets/support.png)](https://github.com/sponsors/DarkGhostHunter)
+
+Your support allows me to keep this package free, up-to-date and maintainable. Alternatively, you can **[spread the word!](http://x.com/share?text=I%20am%20using%20this%20cool%20agent%20library&url=https://github.com%2FLaragear%2FSoftchestrate)**
+
+## Requirements
+
+- An agent harness with native subagent and skill discovery (Claude, Codex, Cursor, OpenRouter, ZCode, to name some).
+- MCP support for tool access. It is not required, since every definition falls back to plain search and file reads when a capability is missing.
+- [Node.js](https://nodejs.org) 22.20 or later for the skills CLI. The agents script only needs `sh`, `tar` and `curl` or `wget`.
+
+Almost all modern harnesses support subagents, skills and MCP tools. If not, check its configuration.
+
+## Installation
+
+You never need to clone this repository. The skills go in with the [skills.sh](https://skills.sh) CLI, which installs them into the discovery path of every agent harness it detects:
+
+```bash
+npx skills add Laragear/Softchestrate
+```
+
+By default it asks which skills and harnesses to use. Add `--all -y` to install everything without questions, or `-g` to make the skills available across projects. Run the command again to update the installed skills.
+
+The skills CLI only distributes skills, so the subagents go in with a small copy-only script:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Laragear/Softchestrate/1.x/install-agents.sh | sh
+```
+
+It copies `agents/` into `~/.agents/agents` and makes the installed files identical to the repository versions on every run. Files that are already equal are left untouched, and anything else in the target directory is never deleted.
+
+> [!WARNING]
+> 
+> The script **overwrites** the installed files without asking. Adapt the copies elsewhere, or your changes will be gone on the next update.
+
+| Option | Effect |
+| --- | --- |
+| `--dry-run` | Reports what would change and writes nothing. |
+
+Environment variables: `SOFTCHESTRATE_REF` installs a tag or commit instead of `1.x`, `SOFTCHESTRATE_HOME` installs somewhere other than `~/.agents`, and `SOFTCHESTRATE_SOURCE` installs from a local checkout.
+
+#Note: `investigating-with-evidence` borrows its subagent sizing, brief and notes format, lookup budget, source weighing and report discipline from Anthropic's `deep-research` skill.
+
+## Adapting to your harness
+
+Neither installer configures any harness. Skills follow the Agent Skills spec, so a harness that supports it loads them directly, and you tune model and effort at dispatch time as described in [Assigning models](AGENTS.md#assigning-models).
+
+Subagent definitions need translating into whatever the harness records, so ask it to adapt them: "Adapt the Softchestrate subagents in `~/.agents/agents` to this harness, following AGENTS.md." Write the adapted copies to the harness's own discovery paths and leave the files in `~/.agents/agents` as they are.
+
+After each update, adapt again the files the installer reports as installed or updated. To use the baselines in a single project only, run `npx skills add Laragear/Softchestrate` inside it, which defaults to a project install, and bring the subagents with `SOFTCHESTRATE_HOME=<project> sh install-agents.sh`.
+
+### Letting your agent install it
+
+If your agent can run shell commands, paste this prompt. Replace `<harness>` with the agent's skills.sh name (for example `claude-code`):
+
+```text
+Install Laragear/Softchestrate globally. Do not clone it.
+
+1. Run: npx skills add Laragear/Softchestrate --skill '*' --agent <harness> -g -y
+2. Download https://raw.githubusercontent.com/Laragear/Softchestrate/1.x/install-agents.sh to a temporary file and read it. Run `sh <file> --dry-run` and show me the report. Wait for my OK, then run `sh <file>`.
+3. Download https://raw.githubusercontent.com/Laragear/Softchestrate/1.x/AGENTS.md and read "Adapting into a harness" and "Assigning models". Adapt the subagents in ~/.agents/agents to this harness and write the copies to its own agent folder. Leave ~/.agents/agents unchanged. Restrict tools on the read-only roles, set no model per definition, and tell me every choice you made.
+4. Report what was installed, where, and anything you could not do.
+```
+
+`--all` is not the same as `--skill '*'`: it also installs into every harness the CLI knows. Naming one harness with `--agent` keeps the install small. The raw `AGENTS.md` is needed because neither installer copies it.
+
+## How does it work?
+
+Everything here is a platform-neutral source definition. An agent is a single Markdown document: a frontmatter with a `name`, a `description` and an optional `complexity`, one of five words, followed by the system prompt. A skill is a `SKILL.md` in a folder of the same name, with a frontmatter of `name`, `description` and an optional `license`, plus `references/` or `scripts/` when it needs templates or checks loaded on demand.
+
+Nothing in the files points to a model, a provider or a harness. Baselines describe *what* to do and *when*, never *where*. The harness you import them into supplies the runtime: model, reasoning effort, tool access and permissions. The [baseline rules](AGENTS.md) govern imports and dispatches. The `complexity` tier is a suggestion about what kind of work a definition does, not a model assignment: the harness picks the cheapest model that can handle each task, as described in [Assigning models](AGENTS.md#assigning-models).
+
+> [!IMPORTANT]
+> 
+> Treat imported baselines as read-only. Tune the runtime, not the baseline.
+
+## The subagents
+
+Twelve agents, each with one role. Choose the narrowest role that fits, or skip the dispatch entirely. The complexity column is a suggestion, not a model choice.
+
+| Agent | Complexity | Description |
+| --- | --- | --- |
+| `build-doctor` | judgment | Diagnoses failing builds, dependency installs and boot errors, and returns ranked root causes. |
+| `code-explorer` | routine | Locates code with read-only fan-out searches and returns conclusions with `path:line` references. |
+| `code-reviewer` | judgment | Reviews completed changes against repository conventions and a fixed quality checklist. |
+| `codemod-runner` | mundane | Applies one fully specified mechanical change across many files, exact match only. |
+| `fixture-factory-generator` | routine | Generates factories, seeders and typed fixtures from existing schemas. |
+| `general-purpose` | judgment | Handles research, search and multi-step tasks when no narrow role fits. |
+| `lint-static-analysis-fixer` | mundane | Runs formatters, linters and static analyzers and applies only their automatic fixes. |
+| `phase-executor` | interpreting | Executes exactly one phase of an approved plan and tracks it in a durable manifest. |
+| `refactoring-applier` | routine | Applies refactoring specs exactly as written, then runs linters and tests. Decides nothing. |
+| `refactoring-finder` | judgment | Reads code with exploration tools, finds reusable helpers and returns ranked refactoring specs, editing nothing. |
+| `security-auditor` | judgment | Finds exploitable security flaws in code and reports each as a testable claim with evidence, for `disproving-audit-findings` to test. |
+| `test-runner` | interpreting | Runs tests or coverage, reports grouped results and hands structural fixes back as change specs. |
+
+## The skills
+
+The complexity column is a suggestion, as for the agents.
+
+| Skill | Complexity | Description |
+| --- | --- | --- |
+| `creating-devcontainers` | judgment | Builds and verifies a DevContainer from repository evidence, matching the host UID and GID. |
+| `deploying-builds` | critical | Deploys, ships, releases, publishes or rolls out a build to a detected destination and verifies the live result. |
+| `disproving-audit-findings` | judgment | Tests code review and audit findings with reproduction tests and reports which are false positives. |
+| `investigating-with-evidence` | judgment | Runs source-traced investigations that end in a checkable report. |
+| `migrating-schemas` | judgment | Writes reversible schema and data migrations that stay safe on live rows, and never runs them. |
+| `orchestrating-plans` | critical | Softchestrates an approved plan by scheduling phases and gating their returns. |
+| `planning-implementations` | critical | Creates, revises and resumes technical implementation plans. |
+| `replicating-production-locally` | judgment | Builds a local replica of the decided production architecture so changes can be tested safely. |
+| `upgrading-dependencies` | judgment | Moves one package or framework to a new version, maps its breaking changes to the code and verifies the result. |
+| `writing-documentation` | interpreting | Writes and edits documentation grounded in the code, with a fixed voice. |
+
+### It's working if
+
+One observable signal per definition, to check an import or a run against.
+
+- `build-doctor`: a red build returns one ranked root cause with log evidence and a one-line fix, or `STATUS: HYPOTHESES` after its bounded runs, never a raw log dump.
+- `code-explorer`: the answer arrives as conclusions with `path:line` references and explicit "not found in X" statements, not file dumps.
+- `code-reviewer`: findings arrive severity-ranked with evidence, spec findings in their own section, and nothing outside the checklist or the spec.
+- `codemod-runner`: the after-census reconciles exactly, so every in-scope match is edited, skipped with a reason, or excluded.
+- `fixture-factory-generator`: generated files imitate the repository's existing factories and never invent a field the schema does not have.
+- `general-purpose`: the report opens by restating the objective and the done condition, then answers with evidence for every claim.
+- `lint-static-analysis-fixer`: every command and exit code is reported, only tool-mandated or closed-list fixes landed, and the rest comes back UNFIXABLE with reasons.
+- `phase-executor`: the manifest shows a terminal status with evidence for every instruction, and the report matches it step for step.
+- `refactoring-applier`: every spec is applied as written, skipped with a reason, or reverted on a failed check, with tools and tests green and nothing committed.
+- `refactoring-finder`: it returns at most 15 ranked, complete specs with the helper reused and the usages checked, or a failure report when no exploration tools exist.
+- `security-auditor`: every finding is a claim a test could refute, with the input-to-sink path and the missing control named.
+- `test-runner`: failures come back grouped by root cause, chore fixes verified by a re-run, and structural issues as self-contained handback specs.
+- `creating-devcontainers`: the container builds, the ownership probe matches the host UID and GID, and every VERIFY line is PASS with evidence.
+- `deploying-builds`: the live version is pinned to the artifact hash, health checks pass, and nothing state-changing ran before the gates.
+- `disproving-audit-findings`: every finding ends as Confirmed, False positive or Not testable, each backed by a reproduction test someone reviewed.
+- `investigating-with-evidence`: every claim in the report carries a verbatim quote and a footnote a reader can open.
+- `migrating-schemas`: every migration names its release, its reverse path or why none exists, and its per-statement lock risk.
+- `orchestrating-plans`: phases land collision-free: each gate reconciles the manifest, the report, the actual diff and the acceptance criteria before any commit, and no second plan starts while `executing/` holds one without the user's choice.
+- `planning-implementations`: an executor with no chat history can run the plan, every acceptance criterion has a check, a runner and a seam, and a plan that has not started executing waits in `pending/`.
+- `replicating-production-locally`: one command starts the replica and one tears it down, with every component row carrying `path:line` evidence and its gaps.
+- `upgrading-dependencies`: every breaking change between the versions is applied, recorded as `not used`, or deferred with a reason.
+- `writing-documentation`: every sentence is grounded in code that exists, in the fixed voice, with no invented defaults.
+
+## Adapting to your harness
+
+Copy the files into the discovery paths the harness reads, then translate the frontmatter into whatever it records. The `name` and `description` map to the listing and dispatch metadata, and the body stays verbatim.
+
+```yaml
+---
+name: "build-doctor"
+description: "Diagnoses why a build, compile, dependency install, ..."
+complexity: "judgment"
+---
+```
+
+`complexity` is an optional top-level field, one of five words from `mundane` to `critical`, defined in [the subagents spec](https://personal-f2f22caf.mintlify.site/specification) and tabled in [AGENTS.md](AGENTS.md#the-complexity-key). Skills carry none. It is tempting to bake a favorite model into the baseline. Do not, because the next harness may not have it.
+
+Treat `complexity` as a suggestion, not a rule. The harness should evaluate each task and pick the model and effort for it, using the tiers described in [Assigning models](AGENTS.md#assigning-models). A `critical` definition whose current task is a bounded procedure may not need the top tier, while a `judgment` security audit may need only a strong one. If the harness has no data on its models, it should look up their capabilities and prices before assigning anything. Usage is the cost to avoid: mundane tasks should not burn the most expensive model.
+
+Map the capabilities an agent requests to the tools the target environment has, with MCP servers where supported. Read-only agents (`code-reviewer`, `build-doctor`, `code-explorer`, `refactoring-finder`) should be limited to read tools in the harness, not only in prose. Where the harness lets you keep a skill from being started by the model alone, do it for `deploying-builds`, since it changes live state. Make runtime adaptations in the harness's native configuration; modify a baseline only when the baseline itself is what you were asked to change.
+
+## How they connect
+
+The diagram at the top shows the plan pipeline alone; this is the whole library. Arrows are handoffs and dispatches the baselines name themselves, read as "sends work to". Any agent is also fair game for a direct dispatch when its narrow role fits, and `general-purpose` is the catch-all behind the skills that say "one fresh sub-agent per task or branch". Nothing in the arrows points at `creating-devcontainers`, `writing-documentation`, `code-explorer`, `refactoring-finder`, `codemod-runner` or `fixture-factory-generator`: each is dispatched straight from the conversation, with the brief its description asks for.
+
+```mermaid
+flowchart TD
+    subgraph SKILLS["Skills: how you work"]
+        PI["planning-implementations"]
+        OP["orchestrating-plans"]
+        UP["upgrading-dependencies"]
+        DB["deploying-builds"]
+        MS["migrating-schemas"]
+        RP["replicating-production-locally"]
+        IW["investigating-with-evidence"]
+        DA["disproving-audit-findings"]
+        CD["creating-devcontainers"]
+        WD["writing-documentation"]
+    end
+
+    subgraph FLEET["Sub-agents: who does the work"]
+        GP["general-purpose"]
+        PE["phase-executor"]
+        RFA["refactoring-applier"]
+        RFF["refactoring-finder"]
+        TR["test-runner"]
+        BD["build-doctor"]
+        LF["lint-static-analysis-fixer"]
+        CR["code-reviewer"]
+        CE["code-explorer"]
+        SA["security-auditor"]
+        CM["codemod-runner"]
+        FF["fixture-factory-generator"]
+    end
+
+    UP -->|"upgrades that move together"| PI
+    PI -->|"authorized execution"| OP
+    OP -->|"one phase per dispatch"| PE
+    OP -->|"tests and coverage"| TR
+    OP -->|"build and boot failures"| BD
+    OP -->|"lint and static analysis"| LF
+    OP -->|"pre-commit review"| CR
+    UP -->|"red install or build"| BD
+    UP -->|"triage on large suites"| TR
+    UP -->|"restructuring"| RFF
+    RFF -->|"specs"| RFA
+    UP -->|"publishing"| DB
+    DB -->|"one task per dispatch"| GP
+    IW -->|"one branch per dispatch"| GP
+    DA -->|"reproduction tests"| GP
+    SA -->|"claims to test"| DA
+    MS -->|"production-shaped copy"| RP
+```
+
+## For maintainers
+
+`references/` holds the researched guidance these definitions follow (Agent Skills spec, vendor docs, papers, expert and community notes), with an index at [`references/INDEX.md`](references/INDEX.md) and an audit checklist at [`references/rules.md`](references/rules.md). It is not copied into harnesses. Behavior changes to a baseline are recorded in the commit history.
+
+## Security
+
+If you discover any security-related issues, please [use the online form](https://github.com/Laragear/Softchestrate/security).
+
+# License
+
+This specific package version is licensed under the terms of the [MIT License](LICENSE.md), at the time of publishing.
