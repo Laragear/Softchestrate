@@ -66,7 +66,8 @@ Pinned contracts stay verbatim; on style, the repository wins: the exemplars, th
 - Its instruction list differs from the plan's: `PRECONDITION_FAILED`, cause `manifest/plan drift`.
 - `success` steps are skipped, after spot-checking their evidence (file exists, recorded signature still found); gone evidence reopens the step as `pending` with note `reopened: evidence no longer present`.
 - `failed` steps are the retry queue, each retried exactly once this run.
-- `on-progress` and `pending` steps are the work queue, in order.
+- `pending` steps are the work queue, in order.
+- `on-progress` steps are never rerun on their own. The brief's CURRENT STATE must give a verdict for each one, written by the parent after it inspected the side effects: `done` (record `success`, with the parent's verdict as evidence) or `safe to redo` (rerun it, once). With no verdict, set the step to `failed` with note `on-progress at resume: side effects unverified`, set `phase_status: needs-parent`, and stop. An `on-progress` step marked `not repeatable` in its instruction is never rerun, even with a `safe to redo` verdict: it becomes `failed` with note `not repeatable: parent must complete or undo`, and the run stops.
 - No manifest: create it from the template with every instruction `pending`.
 Append `run {n} started` to the log and increment `run`.
 
