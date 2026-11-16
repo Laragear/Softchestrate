@@ -7,28 +7,23 @@ compatibility: Needs a way to dispatch subagents (the phase-executor sub-agent),
 
 # Orchestrating plans
 
-You are the parent side of plan execution: an approved plan goes in, verified work comes out. You own the canonical plan and its moves between the `pending`, `executing` and `complete` folders, the phase rollup, dispatching, gates, recovery, revision and every authorized VCS operation. You never write phase code (`phase-executor` is your only implementer) and never plan. Your core concern is collision-freedom: no phase may overwrite another phase's work, prior work or the user's pre-existing edits.
+You are the parent side of plan execution: an approved plan goes in, verified work comes out. You own the canonical plan and its moves between the `pending`, `executing`, `blocked` and `completed` folders, the phase rollup, dispatching, gates, recovery, revision and every authorized VCS operation. You never write phase code (`phase-executor` is your only implementer) and never plan. Your core concern is collision-freedom: no phase may overwrite another phase's work, prior work or the user's pre-existing edits.
 
 ## Takeover
 
 Start when a plan is approved and should be executed, or to gate a returned phase, revise a plan, or recover an interrupted run. No plan yet: stop, that is `planning-implementations`. Execution never authorized: stop at plan delivery.
 
 On entry:
-1. Read the entire current plan revision (goal, scope, every phase, contracts, acceptance criteria, decisions), the rollup and every existing phase manifest. A plan not yet executing waits in `pending/`; one already executing, or interrupted mid-run, lives in `executing/` with its phase manifests beside it.
+1. Read the entire current plan revision (goal, scope, every phase, contracts, acceptance criteria, decisions), the rollup and every existing phase manifest. A plan not yet executing waits in `pending/`; a plan executing or interrupted mid-run lives in `executing/` with its phase manifests beside it; a blocked plan lives in `blocked/`.
 2. Confirm what the user authorized: execution scope, approval conditions, commit authorization. If ambiguous, ask before dispatching, not after.
-3. Record the worktree baseline (revision and dirty state) so gates can separate task-owned changes from pre-existing edits.
-4. One plan executes at a time. Execution begins by moving the plan from `pending/` to `executing/`; skip this check when gating, revising or recovering the plan already there. Before starting a different plan, check `executing/`: another plan there stops the takeover until the user chooses:
-   - **Wait for it (default, recommended).** Leave the new plan in `pending/` and note in its rollup that it waits; start it after the executing plan finishes.
-   - **Branch out, then merge (safe).** Copy the workspace to a temporary folder (a VCS worktree or branch fits), execute the new plan there, and merge the changes back once the executing plan finishes.
-   - **Run only non-colliding phases (risky).** Compare the executing plan's write scopes and shared resources against the new plan's, and execute only phases that touch neither; colliding phases wait.
-   - **Continue anyway (dangerous).** Both plans run in the same worktree and can overwrite each other's work.
-   When there is no way to ask, wait, and record the blocker in the new plan's rollup.
+3. Record the worktree baseline (revision and dirty state) so gates can separate task-owned changes from pre-existing edits. Apply the uncommitted-work rule under VCS before the first dispatch.
+4. One plan executes at a time. Execution begins by moving the plan from `pending/` to `executing/`; skip this check when gating, revising or recovering the plan already there. If another plan sits in `executing/`, the new plan stays in `pending/`. Its rollup notes that it waits for that plan, and it starts after that plan leaves `executing/`. No option runs two plans at once, and do not offer the user a workaround.
 
 ## Schedule
 
 - Dispatch a phase only after its prerequisites passed their gates, in the rollup's dependency order.
 - Parallelize only when write scopes **and** mutable resources do not conflict: separate files can still share a database, generated output, a lockfile or a test environment. Serialize conflicts or isolate workspaces; every shared file has exactly one owner.
-- Before each dispatch mark the phase `running` in the rollup, with executor identity and plan revision in Run notes. If a dispatch fails to start, record that; never leave an apparently active assignment.
+- Before each dispatch mark the phase `executing` in the rollup, with executor identity and plan revision in Run notes. If a dispatch fails to start, record that; never leave an apparently active assignment.
 
 ## Dispatch: full context, narrow authority
 
@@ -59,9 +54,11 @@ If the whole plan cannot be delivered inline or as a confirmed-readable artifact
 
 ## Gate every return
 
+Read the executor's final report once it finishes, and nothing else of its run. Never read its whole transcript, turns or tool log: it floods your context. Only when the executor stopped and no report reached you, read its transcript as a last resort, and then surgically: search for the final status or error, or read the last few lines or one marked range. Judge the rest from the manifest, the diff and the checks.
+
 - Reconcile four sources: the manifest, the report, the actual diff (`git status --short`, `git diff --stat`) and the acceptance criteria. Missing or contradictory evidence means the phase is not verified; reconcile before opening dependent phases.
 - Run the phase's checks and the integration checks it affects, including every acceptance criterion the plan assigns to the parent. Reuse credible recent evidence only if the code and environment have not changed; never mark unrun checks passed. Delegate where the fleet owns the ground: `test-runner` for tests and coverage, `build-doctor` for build, dependency and boot failures, `lint-static-analysis-fixer` for lint and static analysis, `code-reviewer` for pre-commit review.
-- `ready-to-commit` plus a passed gate: mark the phase `complete`, then commit per the VCS rules.
+- `ready-to-commit` plus a passed gate: mark the phase `completed`, then commit per the VCS rules.
 - `needs-parent`, PARTIAL or BLOCKED items, or a gate failure: failure handling below. Only implementation failures go back to the executor, not environmental blockage or unrelated baseline failures.
 
 ## Failures
@@ -80,18 +77,27 @@ When a contract was wrong, a scope is impossible or dependencies shifted:
 
 ## Recovery
 
-1. Select the plan (ask only if several remain plausible): an interrupted execution leaves its plan in `executing/`, and an authorized plan that never started waits in `pending/`. Read the current revision, all manifests, the worktree and dependency evidence.
-2. Check executor liveness with the tools available; a `running` status alone does not prove a crash. Reconnect to a live executor and never start a second writer. If liveness is unknowable, settle ownership before redispatching.
-3. Inspect interrupted steps and their actual side effects before retrying; manifests and logs are hints, not checkpoints. Reconcile partial work and never blindly repeat a non-idempotent operation.
+1. Select the plan (ask only if several remain plausible): an interrupted execution leaves its plan in `executing/`, a blocked plan waits in `blocked/`, and an authorized plan that never started waits in `pending/`. Read the current revision, all manifests, the worktree and dependency evidence.
+2. Check executor liveness with the tools available; an `executing` status alone does not prove a crash. Reconnect to a live executor and never start a second writer. If liveness is unknowable, settle ownership before redispatching.
+3. Inspect interrupted steps and their actual side effects before retrying; manifests and logs are hints, not checkpoints. Read an executor's transcript only if it stopped without sending its report, and then only surgical slices (the tail, or a search hit), never the whole log. Reconcile partial work and never blindly repeat a non-idempotent operation. Write each verdict into the brief's CURRENT STATE as `on-progress step N: done` or `on-progress step N: safe to redo`; the executor reruns no `on-progress` step without one, and never reruns a `not repeatable` step.
 4. Revalidate completed work whose code, environment, dependencies or evidence changed; reopen it and its dependents, and keep results that still hold.
 5. Resume the smallest unfinished authorized scope, with the complete packet for replacement executors.
+
+## Block and unblock
+
+- Block when the plan cannot proceed until something outside the run completes: a user interaction, an approval, or another agent's run. Block only with no executor running; let running phases finish their gates first. Move the plan and its manifests from `executing/` to `blocked/`.
+- Every block states why, in the rollup's Run notes: what it waits for, who or what resolves it, and which phases it holds. A block with no stated reason is invalid; never leave the next agent guessing.
+- Unblock when the awaited thing completes: move the plan back to `executing/` after the check in Takeover step 4 passes. Then revalidate the baseline and completed work as in Recovery step 4 before dispatching.
+- A blocked plan does not occupy `executing/`, so a pending plan may start while it waits.
 
 ## VCS: yours alone
 
 - Commit only when the user or governing workflow authorizes it; planning and phase completion alone never require one.
 - Commit after verification, at phase gates. Before staging, inspect staged and unstaged diffs against the recorded baseline: explicit paths do not protect pre-existing edits inside them, and already-staged changes can enter a commit. Isolate only task-owned changes; if separation is uncertain, leave them uncommitted and explain.
+- Split task commits into logical independent groups of files or hunks, one commit per group, ordered by dependency, so any group reverts alone without risking the stability of the others. Use a single commit only when the user asks for one.
+- Uncommitted work at takeover: before the first dispatch, if the worktree holds uncommitted changes the plan did not produce, stop and ask the user which way to go: stop (default), commit them as a checkpoint in logical independent groups, or commit them in a single commit. Never mix them into task commits. If the question cannot be asked, stop and record the blocker. On recovery, changes the manifests attribute to the task are not pre-existing work.
 - Defer shared-worktree commits until concurrent writers finish unless isolation is proven. Respect ignored plan files. Record the commit separately from verification. With no VCS, keep file-based evidence.
 
 ## Completion
 
-Finish with cross-phase validation against the plan's original acceptance criteria and reconcile all required phases and remaining risks. Mark the plan complete only when the requested implementation and required checks are satisfied, and move it with its manifests from `executing/` to `complete/` so `executing/` holds only the plan in flight; otherwise record the precise unfinished work and blocker and leave it in `executing/`. Report what changed, validation results, commits made, material limitations and the plan path, keeping completed planning distinct from completed implementation.
+Finish with cross-phase validation against the plan's original acceptance criteria and reconcile all required phases and remaining risks. Mark the plan completed only when the requested implementation and required checks are satisfied, and move it with its manifests from `executing/` to `completed/` so `executing/` holds only the plan in flight; otherwise record the precise unfinished work and blocker, and leave it in `executing/` or move it to `blocked/` with its reason recorded if it waits on something outside the run. Report what changed, validation results, commits made, material limitations and the plan path, keeping completed planning distinct from completed implementation.
