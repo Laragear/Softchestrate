@@ -1,6 +1,6 @@
 ---
 name: planning-implementations
-description: "Creates, revises or resumes technical implementation plans: planning, design, architecture, specs, roadmaps, task breakdowns, and requests like 'how should we implement this?', 'think through the approach' or 'plan the fixes for this audit'. Applies to small tasks when a plan is requested. When the input spans unrelated areas (an audit touching models, actions, controllers), proposes splitting it into ordered plans by logical group. Not for implementation-only requests, requests to skip planning, or nontechnical planning."
+description: "Creates, revises or resumes technical implementation plans and task breakdowns, for requests like 'how should we implement this?' or 'plan the fixes for this audit'. Applies to small tasks when a plan is requested. Splits input spanning unrelated areas into ordered plans. Handles 'aside plans': parks out-of-scope or too-big work as stubs in .agents/plans/aside/ and derives plans from them. Not for implementation-only requests, requests to skip planning, or nontechnical planning."
 license: MIT
 ---
 
@@ -13,10 +13,22 @@ Turn the request into a grounded, dependency-ordered plan another agent can exec
 Explicit user instructions and higher-priority instructions beat these defaults. Planning does not itself authorize implementation, delegation, commits or external actions.
 
 - **Plan or revise.** Investigate and deliver the plan; do not implement. A small task gets a proportionate plan.
-- **Plan and execute.** If the user also asked for implementation, finalize and save the plan, then hand execution to `orchestrating-plans` within that authorization, with no extra approval round unless required. The logical-group question below still applies.
-- **Inspect or resume.** Read the saved plan and the actual progress; for a series, read every plan in it and report which is current. A status question gets a status report. A request to continue goes to `orchestrating-plans`. Never infer permission from a saved status.
+- **Plan and execute.** If the user also asked for implementation, finalize and save the plan, then hand execution to `orchestrating-plans` within that authorization, with no extra approval round unless required. The logical-group question below still applies. A plan cannot start executing while another plan is in `executing/`: the new plan stays in `pending/` and the handoff says it waits.
+- **Inspect or resume.** Read the saved plan and the actual progress, wherever it sits among the plan states; for a series, read every plan in it and report which is current. A blocked plan is reported with the reason it is blocked. A status question gets a status report. A request to continue goes to `orchestrating-plans`. Never infer permission from a saved status.
+- **Aside.** Park out-of-scope or too-big work as an aside stub, or derive a full plan from an aside stub (see Aside plans).
 
 Executing a plan, dispatching phases, gates, recovery, revisions during execution and commits belong to `orchestrating-plans`; implementing one phase belongs to the `phase-executor` agent.
+
+## Plan states
+
+Every plan is in exactly one state. Its folder under `.agents/plans/` names the state:
+
+- **Pending**: not yet executing, in `pending/`.
+- **Executing**: being executed, in `executing/`, with its phase manifests beside it.
+- **Blocked**: awaiting something to complete, such as a user interaction or another agent's run, in `blocked/`. The plan names what it waits for and who or what resolves it; a blocked plan never leaves its reason unstated.
+- **Completed**: done with nothing left to do, in `completed/`.
+
+At most one plan sits in `executing/`. A plan cannot be executed while another plan is there, so a new plan waits in `pending/`. A blocked plan does not occupy `executing/`. Asides in `aside/` are not plans and sit outside these states.
 
 ## Interview
 
@@ -51,6 +63,40 @@ Run after grounding, before choosing the approach. A group is work that can be p
 6. **Ask** when two or more groups remain, before writing any plan: show each group's scope and item IDs, the order and a recommendation; offer separate plans in order (recommended), one combined plan, or another grouping. Use the environment's question tool, else ask inline; keep investigating read-only meanwhile. Skip if the user already chose. If asking is impossible (unattended or dispatched), default to the split and record it as an assumption in each plan.
 7. **After the answer**, write one plan per group in order. Plans run one at a time; the next starts after the previous gate passes unless the user says otherwise. Re-verify baseline and evidence at the start of each later plan, since earlier ones changed the code.
 
+## Aside plans
+
+An aside is a todo stub for work that should not join the plan in hand: a nice-to-have, a completionist extra, an unrelated change, or a part too big for one plan. It is not a plan. Nothing executes it, and `orchestrating-plans` never reads `aside/`.
+
+**Park work aside** when it lies outside the goal and acceptance criteria, or when it is too big to fit the plan. Never park a requirement the goal needs: keep it in the plan, or raise it in the Interview. Record each parked item under the plan's "Out of scope" with the aside ID.
+
+Write the stub in `.agents/plans/aside/{aside-id}.md` with this template, saved as a plan is saved (draft, then `cp -n`, then `cmp`):
+
+```markdown
+# Aside: {title}
+
+- id: {aside-id}
+- origin: {plan id, or the request that raised it}
+- reason: nice-to-have | completionist | unrelated | too-big
+- created: {timestamp with timezone}
+
+## Scope
+{Two or three sentences: the work, and the original item IDs it covers.}
+
+## Known facts
+- {paths, symbols or constraints verified so far, each with its evidence}
+
+## Open decisions
+- {each decision the derived plan needs, with a recommendation}
+```
+
+**Derive a plan from an aside** when the user asks for aside plans or names one:
+1. List the stubs in `aside/` with their reason. If none exist, say so. If several are plausible and the user did not name one, ask which to derive from, with a recommendation.
+2. Check for duplicates. Compare the stub with every plan in `pending/`, `executing/`, `blocked/` and `completed/`, and with the other asides. If a plan already covers the work, delete the stub and tell the user which plan covers it. If another aside overlaps, ask the user before merging the two; a merged stub keeps the older ID.
+3. Tell the user which aside the plan derives from, before grounding starts.
+4. Treat the stub as a request. Its known facts may be stale, so ground the plan again and interview on its open decisions.
+5. Write the full plan to `pending/` as usual, and record the source aside ID under "Scope and constraints".
+6. After the plan is saved and its `cmp` check passes, read the aside file, delete it, and tell the user the aside was removed and which plan replaced it.
+
 ## Choose and bound the approach
 
 Apply YAGNI, then KISS and DRY, then SOLID where existing complexity warrants it. First check whether current behavior already meets the need; otherwise prefer platform features, installed dependencies and project patterns before new code. Propose scope reductions rather than silently dropping requirements.
@@ -63,11 +109,12 @@ Decide where each phase's behavior is verified before writing phases. A seam is 
 
 ## Write the durable plan
 
-Use the user's or repository's required location; otherwise a plan is always created in the `pending` folder, never in `executing`, until its execution begins. Pending keeps proposals and amendments away from the plan under execution, so other plans keep executing while a new one is proposed or amended:
+Use the user's or repository's required location; otherwise a plan is always created in the `pending` folder, never in `executing`, until its execution begins. The header `status` matches the folder: `draft` and `ready` plans sit in `pending/`. Pending keeps proposals and amendments away from the plan under execution, so that plan keeps running while a new one is proposed or amended:
 - Plan (not yet executing): `.agents/plans/pending/{plan-id}.md`
+- Aside stub (todo, not a plan): `.agents/plans/aside/{aside-id}.md`
 - Phase manifests (created during execution by `phase-executor`, beside the plan once it moved to executing): `.agents/plans/executing/{plan-id}/phase-{N}.md`
 
-Use a descriptive kebab-case ID, adding a suffix only to avoid a collision. Revisions keep the ID and increment `revision`; a new linked plan only for a true replacement. Never overwrite an unrelated plan. Amend a pending plan where it is; a plan under execution is revised by `orchestrating-plans` where it lives. For a series use `{series-id}-{order}-{group}` (`audit-fixes-1-models`, `audit-fixes-2-actions`) and set `series`, `group`, `order`, `depends on plans`; plans with no mutual dependency may share an order number; find a series by its ID prefix across `pending/`, `executing/` and `complete/`.
+Use a descriptive kebab-case ID, adding a suffix only to avoid a collision. Revisions keep the ID and increment `revision`; a new linked plan only for a true replacement. Never overwrite an unrelated plan. Amend a pending plan where it is; a plan under execution is revised by `orchestrating-plans` where it lives. For a series use `{series-id}-{order}-{group}` (`audit-fixes-1-models`, `audit-fixes-2-actions`) and set `series`, `group`, `order`, `depends on plans`; plans with no mutual dependency may share an order number; find a series by its ID prefix across `pending/`, `executing/`, `blocked/` and `completed/`.
 
 Save before presenting or dispatching. Draft the plan once as Markdown in a scratch file (the session scratchpad, not the repository), then copy it to the target path with a file-copy tool or `cp`: `cp -n` for a new plan ID so an existing plan is never overwritten, plain `cp` for a revision of the same ID. Confirm the copy with `cmp` against the draft. Write the target with a write tool only as a last resort, when no copy tool or `cp` is available or the copy fails; never re-output a plan that is already saved. If writes are unavailable, deliver the full Markdown inline, name the intended path and say persistence is unavailable. A native planning tool may mirror the file; the Markdown is canonical.
 
@@ -81,7 +128,7 @@ Scale detail to the work and omit irrelevant sections, but keep goal, scope, pha
 - workspace: {project root or intended workspace}
 - baseline: {revision and relevant dirty state, or unavailable/no VCS}
 - updated: {timestamp with timezone}
-- status: draft | ready | executing | blocked | complete
+- status: draft | ready | executing | blocked | completed
 - execution authorization: {what the user authorized; approval conditions}
 - series / group / order / depends on plans: {series plans only}
 
@@ -143,7 +190,7 @@ Writing rules. The readers are an executor with no chat history and nobody to as
 - Cut filler, hedging and restated headings. Never cut a fact that changes what the executor does.
 - On revision, keep unchanged steps word for word and in order: the executor compares its manifest with the plan's steps.
 
-Rollup statuses: `pending`, `running`, `blocked`, `failed`, `complete`, `skipped`. Complete means the phase's gate passed, not that a commit exists. Skipping needs a reason and a replacement for any still-required outcome. Name real commands only when verified, otherwise add a discovery step. A check can be inspection, a build, a test or a manual procedure; do not add a test per bookkeeping action or rerun a suite per step.
+Rollup statuses: `pending`, `executing`, `waiting`, `failed`, `completed`, `skipped`. `waiting` means the phase awaits a prerequisite, input or another phase. Completed means the phase's gate passed, not that a commit exists. Skipping needs a reason and a replacement for any still-required outcome. Name real commands only when verified, otherwise add a discovery step. A check can be inspection, a build, a test or a manual procedure; do not add a test per bookkeeping action or rerun a suite per step.
 
 ## Readiness and delivery
 
