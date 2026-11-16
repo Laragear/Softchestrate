@@ -987,5 +987,149 @@
     ]
    }
   ]
+ },
+{
+  "id": "aside-create-parks-extras",
+  "target": "skills/planning-implementations/SKILL.md",
+  "fixture": "aside-create",
+  "task": "Plan how to add soft deletes to the Post model, with a restore endpoint. The restore endpoint is required. The bulk-restore admin screen and the audit log are nice-to-have extras: keep them out of this plan and park them as aside plans. Plan only, do not implement. Save the plan under .agents/plans/.",
+  "checks": [
+   {
+    "type": "file_glob_match",
+    "glob": ".agents/plans/aside/*.md",
+    "pattern": "reason:\\s*(nice-to-have|completionist)",
+    "min_new": 2
+   },
+   {
+    "type": "file_glob_match",
+    "glob": ".agents/plans/aside/*.md",
+    "pattern": "audit",
+    "flags": "i",
+    "min_new": 1
+   },
+   {
+    "type": "file_glob_match",
+    "glob": ".agents/plans/aside/*.md",
+    "pattern": "bulk",
+    "flags": "i",
+    "min_new": 1
+   },
+   {
+    "type": "file_glob_match",
+    "glob": ".agents/plans/pending/*.md",
+    "pattern": "restore",
+    "flags": "i",
+    "min_new": 1
+   },
+   {
+    "type": "cmd",
+    "cmd": "grep -qi 'aside' .agents/plans/pending/*.md"
+   },
+   {
+    "type": "unchanged",
+    "paths": [
+     "app",
+     "database",
+     "README.md"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "aside-derive-from-named-stub",
+  "target": "skills/planning-implementations/SKILL.md",
+  "fixture": "aside-derive",
+  "task": "Make a plan from the aside stub soft-delete-bulk-restore. Plan only, do not implement. Save the plan under .agents/plans/.",
+  "checks": [
+   {
+    "type": "report_match",
+    "pattern": "soft-delete-bulk-restore",
+    "flags": "i"
+   },
+   {
+    "type": "file_glob_match",
+    "glob": ".agents/plans/pending/*.md",
+    "pattern": "soft-delete-bulk-restore",
+    "min_new": 1
+   },
+   {
+    "type": "file_absent",
+    "path": ".agents/plans/aside/soft-delete-bulk-restore.md"
+   },
+   {
+    "type": "file_exists",
+    "path": ".agents/plans/aside/rename-post-slugs.md"
+   },
+   {
+    "type": "unchanged",
+    "paths": [
+     "app",
+     "database",
+     "README.md"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "aside-duplicate-removed",
+  "target": "skills/planning-implementations/SKILL.md",
+  "fixture": "aside-duplicate",
+  "task": "Derive a plan from the aside post-soft-deletes-again. Plan only, do not implement. Save the plan under .agents/plans/.",
+  "checks": [
+   {
+    "type": "report_match",
+    "pattern": "post-soft-deletes",
+    "flags": "i"
+   },
+   {
+    "type": "report_match",
+    "pattern": "duplicate|already|covered|overlap",
+    "flags": "i"
+   },
+   {
+    "type": "file_absent",
+    "path": ".agents/plans/aside/post-soft-deletes-again.md"
+   },
+   {
+    "type": "file_absent",
+    "glob": ".agents/plans/pending/*.md"
+   },
+   {
+    "type": "unchanged",
+    "paths": [
+     "app",
+     "database",
+     "README.md",
+     ".agents/plans/completed"
+    ]
+   }
+  ]
+ },
+ {
+  "id": "aside-not-used-for-plain-plan",
+  "target": "skills/planning-implementations/SKILL.md",
+  "fixture": "aside-create",
+  "task": "Plan how to add soft deletes to the Post model, with a restore endpoint. Plan only, do not implement. Save the plan under .agents/plans/.",
+  "checks": [
+   {
+    "type": "file_glob_match",
+    "glob": ".agents/plans/pending/*.md",
+    "pattern": "restore",
+    "flags": "i",
+    "min_new": 1
+   },
+   {
+    "type": "file_absent",
+    "glob": ".agents/plans/aside/*.md"
+   },
+   {
+    "type": "unchanged",
+    "paths": [
+     "app",
+     "database",
+     "README.md"
+    ]
+   }
+  ]
  }
 ]
