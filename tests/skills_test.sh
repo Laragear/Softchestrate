@@ -23,11 +23,18 @@ fi
 
 N_SKILLS=$(find "$REPO/skills" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')
 
+# The CLI colorizes its output on CI runners, so ANSI escape codes are stripped
+# from everything it prints before the text is matched.
+ESC=$(printf '\033')
+strip_ansi() {
+  sed "s/${ESC}\\[[0-9;:?]*[A-Za-z]//g" "$@"
+}
+
 # run_skills [args...]: runs the CLI against this repository, sets STATUS and OUT.
 run_skills() {
   STATUS=0
   npx -y skills add "$REPO" "$@" > "$ROOT/out" 2>&1 || STATUS=$?
-  OUT=$(cat "$ROOT/out")
+  OUT=$(strip_ansi "$ROOT/out")
 }
 
 # ---- frontmatter ------------------------------------------------------------
