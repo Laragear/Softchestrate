@@ -853,48 +853,6 @@
   ]
  },
  {
-  "id": "writing-docs-voice",
-  "target": "skills/writing-documentation/SKILL.md",
-  "fixture": "docs",
-  "task": "Write the package README.md for this library.",
-  "checks": [
-   {
-    "type": "file_match",
-    "path": "README.md",
-    "pattern": "`slugify\\(?"
-   },
-   {
-    "type": "file_match",
-    "path": "README.md",
-    "pattern": "`limit\\(?"
-   },
-   {
-    "type": "file_forbid",
-    "path": "README.md",
-    "pattern": "(?<!\\[)!(?!(NOTE|WARNING|TIP|IMPORTANT|CAUTION)\\])",
-    "strip_code": true
-   },
-   {
-    "type": "file_forbid",
-    "path": "README.md",
-    "pattern": ";",
-    "strip_code": true
-   },
-   {
-    "type": "file_forbid",
-    "path": "README.md",
-    "pattern": "\u2014|\u2013",
-    "strip_code": true
-   },
-   {
-    "type": "file_forbid",
-    "path": "README.md",
-    "pattern": "[\\U0001F300-\\U0001FAFF\\u2600-\\u27BF]",
-    "strip_code": false
-   }
-  ]
- },
- {
   "id": "refactoring-naming",
   "target": "agents/refactoring-finder.md",
   "fixture": "expressive",
@@ -1029,7 +987,7 @@
    }
   ]
  },
-{
+ {
   "id": "aside-create-parks-extras",
   "target": "skills/planning-implementations/SKILL.md",
   "fixture": "aside-create",
@@ -1170,6 +1128,57 @@
      "database",
      "README.md"
     ]
+   }
+  ]
+ },
+ {
+  "id": "writing-code-comments-raw",
+  "target": "skills/writing-code-comments/SKILL.md",
+  "fixture": "comments",
+  "task": "Add code comments to src/Packer.php following your instructions. Comment the public property and method, and the raw byte-packing loop.",
+  "checks": [
+   {
+    "type": "file_match",
+    "path": "src/Packer.php",
+    "pattern": "/\\*\\*(?:(?!\\*/)[\\s\\S])*\\*/\\s*public function pack\\("
+   },
+   {
+    "type": "file_match",
+    "path": "src/Packer.php",
+    "pattern": "/\\*\\*(?:(?!\\*/)[\\s\\S])*\\*/\\s*public int \\$maxLength"
+   },
+   {
+    "type": "file_match",
+    "path": "src/Packer.php",
+    "pattern": "//[^\\n]*[Ii]nput",
+    "flags": ""
+   },
+   {
+    "type": "file_forbid",
+    "path": "src/Packer.php",
+    "pattern": "This method",
+    "flags": "i"
+   },
+   {
+    "type": "file_forbid",
+    "path": "src/Packer.php",
+    "pattern": "//\\s*(increment|loop|append|assign)",
+    "flags": "i"
+   },
+   {
+    "type": "file_match",
+    "path": "src/Packer.php",
+    "pattern": "public function pack\\(array \\$values\\): string"
+   },
+   {
+    "type": "file_match",
+    "path": "src/Packer.php",
+    "pattern": "public int \\$maxLength = 255;"
+   },
+   {
+    "type": "file_match",
+    "path": "src/Packer.php",
+    "pattern": "return substr\\(\\$out, 0, \\$this->maxLength\\);"
    }
   ]
  }

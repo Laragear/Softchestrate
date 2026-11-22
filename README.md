@@ -139,7 +139,7 @@ The complexity column is a suggestion, as for the agents.
 | `planning-implementations` | critical | Creates, revises and resumes technical implementation plans. |
 | `replicating-production-locally` | judgment | Builds a local replica of the decided production architecture so changes can be tested safely. |
 | `upgrading-dependencies` | judgment | Moves one package or framework to a new version, maps its breaking changes to the code and verifies the result. |
-| `writing-documentation` | interpreting | Writes and edits documentation grounded in the code, with a fixed voice. |
+| `writing-code-comments` | interpreting | Decides when code needs comments and writes method, property and attribute descriptions in ASD-STE100, plus inline comments for verbose raw data handling. |
 
 ### It's working if
 
@@ -166,7 +166,7 @@ One observable signal per definition, to check an import or a run against.
 - `planning-implementations`: an executor with no chat history can run the plan, every acceptance criterion has a check, a runner and a seam, and a plan that has not started executing waits in `pending/`.
 - `replicating-production-locally`: one command starts the replica and one tears it down, with every component row carrying `path:line` evidence and its gaps.
 - `upgrading-dependencies`: every breaking change between the versions is applied, recorded as `not used`, or deferred with a reason.
-- `writing-documentation`: every sentence is grounded in code that exists, in the fixed voice, with no invented defaults.
+- `writing-code-comments`: every comment is grounded in code that exists, follows the sentence rules, and no comment restates the signature.
 
 ## Adapting to your harness
 
@@ -188,7 +188,7 @@ Map the capabilities an agent requests to the tools the target environment has, 
 
 ## How they connect
 
-The diagram at the top shows the plan pipeline alone; this is the whole library. Arrows are handoffs and dispatches the baselines name themselves, read as "sends work to". Any agent is also fair game for a direct dispatch when its narrow role fits, and `general-purpose` is the catch-all behind the skills that say "one fresh sub-agent per task or branch". Nothing in the arrows points at `creating-devcontainers`, `writing-documentation`, `code-explorer`, `refactoring-finder`, `codemod-runner` or `fixture-factory-generator`: each is dispatched straight from the conversation, with the brief its description asks for.
+The diagram at the top shows the plan pipeline alone; this is the whole library. Arrows are handoffs and dispatches the baselines name themselves, read as "sends work to". Any agent is also fair game for a direct dispatch when its narrow role fits, and `general-purpose` is the catch-all behind the skills that say "one fresh sub-agent per task or branch". Nothing in the arrows points at `creating-devcontainers`, `writing-code-comments`, `code-explorer`, `refactoring-finder`, `codemod-runner` or `fixture-factory-generator`: each is dispatched straight from the conversation, with the brief its description asks for.
 
 ```mermaid
 flowchart TD
@@ -202,7 +202,7 @@ flowchart TD
         IW["investigating-with-evidence"]
         DA["disproving-audit-findings"]
         CD["creating-devcontainers"]
-        WD["writing-documentation"]
+        WD["writing-code-comments"]
     end
 
     subgraph FLEET["Sub-agents: who does the work"]
