@@ -1,6 +1,6 @@
 ---
 name: writing-code-comments
-description: Decides when and how to write comments in source code: doc comments for methods, properties and attributes written to ASD-STE100, and inline comments for verbose raw array, vector, string or regex manipulation. Use when the user asks to comment, document, add docblocks or explain code in comments, or when you write code that slices, indexes, reshapes or pattern-matches raw data. Not for README files, guides, docs pages, commit messages or changelogs.
+description: "Decides when and how to write comments in source code. Covers doc comments for methods, properties and attributes written to ASD-STE100, and inline comments for verbose raw array, vector, string or regex manipulation. Use when the user asks to comment, document, add docblocks or explain code in comments, or when you write code that slices, indexes, reshapes or pattern-matches raw data. Not for README files, guides, docs pages, commit messages or changelogs."
 license: MIT
 ---
 
